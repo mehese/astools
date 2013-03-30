@@ -1,1 +1,17 @@
-tools to use in manipulating structures
+Tools to use in manipulating structures
+
+TO DO NOW:
+
+	- create print_struct(Struct, format='xyz') function to print the
+	  structrure in the desired format
+	- create function read_struct(textfile) that should 
+	  return (cell_params, [list of Atom objects])
+	- Structin should take a list of Atom objects + cell 
+	  params
+
+TO DO AFTER NOW (still ASAP, new .py file) :
+
+	- create simple rdf class
+	- calculate & plot pair distribution function
+		rdf(StructAts, radius, **pair labels)
+		return structure rdf
