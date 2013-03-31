@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from structures import *
+
 def main() :
     #struct1.elems = list(set([x for x in struct1.elems if x.z > 2.] + [x for x in struct1.elems if x.label == 'layer']))
     ## removing lowerst Si atoms => ability to create thicker layers

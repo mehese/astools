@@ -28,10 +28,10 @@ class StructIn :
         self.elems = []
         for line in f[5:no_ats+5] :
             line = [line.split()[0]] + map(lambda x: float(x), line.replace('E', 'e').split()[1:4]) + line.split()[4:]
-                        for i in range(1,3) :
-                            if line[i] < 0. :
-                                line[i] = 1. + line[i]
-                        elem = Atom(line[0], line[1]*self.coordx, line[2]*self.coordy, line[3]) 
+            for i in range(1,3) :
+                if line[i] < 0. :
+                    line[i] = 1. + line[i]
+                    elem = Atom(line[0], line[1]*self.coordx, line[2]*self.coordy, line[3]) 
             if line[-1] == '$' :
                 elem.Label('layer')
             else :
