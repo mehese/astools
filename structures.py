@@ -1,6 +1,6 @@
 from operator import attrgetter
         
-class Atom :
+class Atom:
     """
     basically is an object that defines an atom by it ABSOLUTE coordinates, species and (optional) label
     """
@@ -11,7 +11,26 @@ class Atom :
     def Charge(self, val) :
         self.charge = val
 
-class StructIn :
+class AtomStruct:
+    """ Defines a structure of atoms
+
+    Keyword arguments:
+
+    at_list -- a list of Atom objects
+    coords -- a tuple (x_dimension, y_dimension, z_dimension,
+                       alpha_angle, beta_angle, gamma_angle)
+    coordstyle -- (default='Angles') a string that defines how to read 
+        the coords tuple. If coordstyle='vecs' then coors tuple is read
+        as (x0, x1, y0, y1, z0, z1)
+
+    """
+
+    def __init__(self, at_list, coords, coordstyle='Angles') :
+        if coordstyle == 'Angles' :
+            (coordx, coordy, coordz, alpha, beta, gamma) = coords
+    pass
+
+class StructIn:
     """
     reads in a slab structure, gets its x and y dimensions 
     also creates the atom list using the structure Atom
@@ -38,7 +57,7 @@ class StructIn :
                 elem.Label('bulk')
             self.elems.append(elem)
 
-class gener_ :
+class gener_:
     """
     generates an interface from a structin structure
     """

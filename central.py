@@ -18,6 +18,7 @@ def main() :
     #struct2.printy()
     #struct2.printlmp()
     #struct2.check_charge()struct1 = StructIn('interface5')
+    print AtomStruct.__doc__
     print 'Hello World!'
 
 
