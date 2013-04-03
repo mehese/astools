@@ -18,8 +18,9 @@ def main() :
     #struct2.printy()
     #struct2.printlmp()
     #struct2.check_charge()struct1 = StructIn('interface5')
-    print AtomStruct.__doc__
-    print 'Hello World!'
+    atom1 = Atom('Si', 1., 1., 1.)
+    atom2 = Atom('Si', 0., 0., 1.)
+    cell1 = AtomStruct([atom1, atom2],(2., 2., 2., 90., 90., 90.))
 
 
 # make sure the codelines don't get executed if we insert this as a module
