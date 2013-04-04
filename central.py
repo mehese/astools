@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from structures import *
+from ReadWrite import *
 
 def main() :
     #struct1.elems = list(set([x for x in struct1.elems if x.z > 2.] + [x for x in struct1.elems if x.label == 'layer']))
@@ -18,8 +19,10 @@ def main() :
     #struct2.printy()
     #struct2.printlmp()
     #struct2.check_charge()struct1 = StructIn('interface5')
-    print AtomStruct.__doc__
-    print 'Hello World!'
+
+    Str1 = ReadStruct('CrystalCell', style='crystal')
+
+    print 'ze end!'
 
 
 # make sure the codelines don't get executed if we insert this as a module

@@ -25,10 +25,15 @@ class AtomStruct:
 
     """
 
-    def __init__(self, at_list, coords, coordstyle='Angles') :
-        if coordstyle == 'Angles' :
+    def __init__(self, at_list, coords, coordstyle='Angles', pb='bulk') :
+        if coordstyle == 'Angles' and pb=='bulk':
             (coordx, coordy, coordz, alpha, beta, gamma) = coords
-    pass
+        else :
+            # Print and error message for unimplemented stuff and exit
+            ERR = 'Can\'t do ( Angles = '+ str(coordstyle)+' and bp = '+ \
+                  str(pb) + ')'
+            exit()
+        self.atoms = list(at_list)
 
 class StructIn:
     """
