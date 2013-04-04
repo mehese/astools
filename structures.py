@@ -14,33 +14,21 @@ class Atom:
 class AtomStruct:
     """ Defines a structure of atoms
 
-    """
+    Keyword arguments:
 
-    def __init__(self, at_list, coords, pb='bulk', coordstyle='Angles') :
-        """ (list of Atom objects), (tuple of float), str, str
-                -> None
-        Keyword arguments:
-
-        at_list -- a list of Atom objects
-        coords -- a tuple (x_dimension, y_dimension, z_dimension,
-                           alpha_angle, beta_angle, gamma_angle)
-        coordstyle -- (default='Angles') a string that defines how to read 
+    at_list -- a list of Atom objects
+    coords -- a tuple (x_dimension, y_dimension, z_dimension,
+                       alpha_angle, beta_angle, gamma_angle)
+    coordstyle -- (default='Angles') a string that defines how to read 
         the coords tuple. If coordstyle='vecs' then coors tuple is read
         as (x0, x1, y0, y1, z0, z1)
-        """
 
-        self.atoms = list(at_list)
-        if coordstyle == 'Angles' and pb == 'bulk' :
-            (self.coordx, self.coordy, self.coordz, self.alpha, 
-             self.beta, self.gamma) = coords
-        elif coordstyle == 'Angles' and pb == 'slab' :
-            (self.coordx, self.coordy, self.alpha, self.beta, 
-             self.gamma) = coords
-        else :
-            err_ = 'ERROR coordstyle = '+str(coordstyle)+' and pb = '+str(pb) \
-                   +' not implemented yet'
-            print err_
-            exit()
+    """
+
+    def __init__(self, at_list, coords, coordstyle='Angles') :
+        if coordstyle == 'Angles' :
+            (coordx, coordy, coordz, alpha, beta, gamma) = coords
+    pass
 
 class StructIn:
     """
