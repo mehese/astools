@@ -2,3 +2,5 @@
 *.swp
 # no python compiled files to be stored
 *.py[co]
+data.*
+dump.*

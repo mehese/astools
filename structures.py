@@ -23,17 +23,27 @@ class AtomStruct:
         the coords tuple. If coordstyle='vecs' then coors tuple is read
         as (x0, x1, y0, y1, z0, z1)
 
+    Contains:
+
+    self.coord[xyz] = cell cordinates
+    alpha, beta, gamma = cell angles
+    self.atoms = atoms list
+
     """
 
     def __init__(self, at_list, coords, coordstyle='Angles', pb='bulk') :
         if coordstyle == 'Angles' and pb=='bulk':
-            (coordx, coordy, coordz, alpha, beta, gamma) = coords
+            (self.coordx, self.coordy, self.coordz, 
+             self.alpha, self.beta, self.gamma) = coords
         else :
             # Print and error message for unimplemented stuff and exit
             ERR = 'Can\'t do ( Angles = '+ str(coordstyle)+' and bp = '+ \
                   str(pb) + ')'
             exit()
         self.atoms = list(at_list)
+    
+    def charge(self):
+        return sum([atom.charge for atom in self.atoms])
 
 class StructIn:
     """

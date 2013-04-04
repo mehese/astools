@@ -15,13 +15,18 @@ def main() :
     ## x.45 expansion of SiO2 yields good stoicheometry
     #struct2.expand(.8, 1., 5.4289, 8.5126)
     #struct2.widen(2, 2)
-    #struct2.check_ratio()
-    #struct2.printy()
     #struct2.printlmp()
     #struct2.check_charge()struct1 = StructIn('interface5')
 
     Str1 = ReadStruct('CrystalCell', style='crystal')
-
+    # Setting the cell charge
+    for atom in Str1.atoms :
+        if atom.species == 'Si':
+            atom.Charge(2.0)
+        elif atom.species == 'O':
+            atom.Charge(-1.0)
+    #print Str1.charge()
+    PrintStruct(Str1, 'lmp_data', name='data.astools')
     print 'ze end!'
 
 
