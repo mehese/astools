@@ -26,7 +26,8 @@ def main() :
         elif atom.species == 'O':
             atom.Charge(-1.0)
     #print Str1.charge()
-    PrintStruct(Str1, 'lmp_data', name='data.astools')
+    #PrintStruct(Str1, 'lmp_data', name='data.astools')
+    PrintStruct(Str1, 'crystal_inp', name='INPUT_astools')
     print 'ze end!'
 
 

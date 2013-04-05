@@ -41,6 +41,7 @@ class AtomStruct:
                   str(pb) + ')'
             exit()
         self.atoms = list(at_list)
+        self.periodicity = pb
     
     def charge(self):
         return sum([atom.charge for atom in self.atoms])
