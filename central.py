@@ -15,9 +15,9 @@ def main() :
     #struct2.separate(11.2)
     ## x.45 expansion of SiO2 yields good stoicheometry
     #struct2.expand(.8, 1., 5.4289, 8.5126)
-    #struct2.widen(2, 2)
     #struct2.printlmp()
-    #struct2.check_charge()struct1 = StructIn('interface5')
+    #struct2.check_charge()
+    #struct1 = StructIn('interface5')
 
     Str1 = ReadStruct('CrystalCell', style='crystal')
     # Setting the cell charge
@@ -27,11 +27,10 @@ def main() :
         elif atom.species == 'O':
             atom.Charge(-1.0)
     #print Str1.charge()
-    #PrintStruct(Str1, 'lmp_data', name='data.astools')
-    Str1 = widen(Str1, 3, 3, 3) 
-    PrintStruct(Str1, 'crystal_inp', name='INPUT_astools')
-    #PrintStruct(Str2, 'lmp_data', name='data.astools')
-    print 'ze end!'
+    Str1 = repeat(Str1, 4, 3, 4) 
+    #PrintStruct(Str1, 'crystal_inp', name='INPUT_astools')
+    PrintStruct(Str1, 'lmp_data', name='data.astools')
+    print 'Done!'
 
 
 # make sure the codelines don't get executed if we insert this as a module

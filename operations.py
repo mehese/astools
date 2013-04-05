@@ -2,20 +2,17 @@ from structures import *
 import itertools as its
 
 
-def widen(structure, ex, ey, ez) :
+def repeat(structure, ex, ey, ez) :
     """Returns an (ex X ey X ez) widenened AtomStruct
     (AtomStruct, int, int, int) -> AtomStruct
     """
     coord_x = ex*structure.coordx
     coord_y = ey*structure.coordy
     coord_z = ez*structure.coordz
-    #ats = [Atom(at.species, xx*at.x, yy*at.y, zz*at.z) for at in \
-    #       structure.atoms for xx in range(1, ex+1) for yy in range(1, ey+1) \
-    #       for zz in range(1, ez+1)]
     ats = []
     for xx, yy, zz in its.product(range(ex), range(ey), 
                                   range(ez)):
-        print xx, yy, zz
+        # print xx, yy, zz
         for at in structure.atoms:
             at_ = Atom(at.species, at.x + xx*structure.coordx, 
                        at.y + yy*structure.coordy, 
