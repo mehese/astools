@@ -2,6 +2,7 @@
 
 from structures import *
 from ReadWrite import *
+from operations import *
 
 def main() :
     #struct1.elems = list(set([x for x in struct1.elems if x.z > 2.] + [x for x in struct1.elems if x.label == 'layer']))
@@ -27,7 +28,9 @@ def main() :
             atom.Charge(-1.0)
     #print Str1.charge()
     #PrintStruct(Str1, 'lmp_data', name='data.astools')
-    PrintStruct(Str1, 'crystal_inp', name='INPUT_astools')
+    Str2 = widen(Str1, 2, 2, 2) 
+    PrintStruct(Str2, 'crystal_inp', name='INPUT_astools')
+    PrintStruct(Str2, 'lmp_data', name='data.astools')
     print 'ze end!'
 
 
