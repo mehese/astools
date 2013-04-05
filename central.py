@@ -28,9 +28,9 @@ def main() :
             atom.Charge(-1.0)
     #print Str1.charge()
     #PrintStruct(Str1, 'lmp_data', name='data.astools')
-    Str2 = widen(Str1, 2, 2, 2) 
-    PrintStruct(Str2, 'crystal_inp', name='INPUT_astools')
-    PrintStruct(Str2, 'lmp_data', name='data.astools')
+    Str1 = widen(Str1, 3, 3, 3) 
+    PrintStruct(Str1, 'crystal_inp', name='INPUT_astools')
+    #PrintStruct(Str2, 'lmp_data', name='data.astools')
     print 'ze end!'
 
 

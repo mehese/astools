@@ -7,17 +7,19 @@ def widen(structure, ex, ey, ez) :
     (AtomStruct, int, int, int) -> AtomStruct
     """
     coord_x = ex*structure.coordx
-    coord_y = ex*structure.coordy
-    coord_z = ex*structure.coordz
+    coord_y = ey*structure.coordy
+    coord_z = ez*structure.coordz
     #ats = [Atom(at.species, xx*at.x, yy*at.y, zz*at.z) for at in \
     #       structure.atoms for xx in range(1, ex+1) for yy in range(1, ey+1) \
     #       for zz in range(1, ez+1)]
     ats = []
-    for xx, yy, zz in its.product(range(1, ex+1), range(1, ey+1), 
-                                  range(1,ez+1)):
+    for xx, yy, zz in its.product(range(ex), range(ey), 
+                                  range(ez)):
         print xx, yy, zz
         for at in structure.atoms:
-            at_ = Atom(at.species, at.x*xx, at.y*yy, at.z*zz)
+            at_ = Atom(at.species, at.x + xx*structure.coordx, 
+                       at.y + yy*structure.coordy, 
+                       at.z + zz*structure.coordz)
             at_.Charge(at.charge)
             ats.append(at_)
 
