@@ -27,9 +27,9 @@ def main() :
         elif atom.species == 'O':
             atom.Charge(-1.0)
     #print Str1.charge()
-    Str1 = repeat(Str1, 4, 3, 4) 
+    Str1 = repeat(Str1, 3, 3, 3) 
     #PrintStruct(Str1, 'crystal_inp', name='INPUT_astools')
-    PrintStruct(Str1, 'lmp_data', name='data.astools')
+    PrintStruct(Str1, 'lmp_data', name='data.SiO2_veloc')
     print 'Done!'
 
 
