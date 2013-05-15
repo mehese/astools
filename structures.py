@@ -6,10 +6,13 @@ class Atom:
     """
     def __init__(self, species, x, y, z) :
         self.species, self.x, self.y, self.z = species, x, y, z
+        self.tags = []
     def Label(self, text) :
         self.label = text
     def Charge(self, val) :
         self.charge = val
+    def Addtag(tag):
+        self.tags.append(tag)
 
 class AtomStruct:
     """ Defines a structure of atoms
