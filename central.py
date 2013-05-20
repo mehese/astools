@@ -5,17 +5,11 @@ from ReadWrite import *
 from operations import *
 
 def main() :
-    Str1 = ReadStruct('CrystalCell', style='crystal')
-    # Setting the cell charge
-    for atom in Str1.atoms :
-        if atom.species == 'Si':
-            atom.Charge(2.0)
-        elif atom.species == 'O':
-            atom.Charge(-1.0)
-    #print Str1.charge()
-    Str1 = repeat(Str1, 3, 3, 3) 
-    #PrintStruct(Str1, 'crystal_inp', name='INPUT_astools')
-    PrintStruct(Str1, 'lmp_data', name='data.SiO2_veloc')
+    SiO2Bulk = ReadStruct('CrystalCell', style='crystal')
+    SiO2Bulk.normalise()
+    #SiO2Bulk = repeat(SiO2Bulk, 3, 3, 3) 
+    #PrintStruct(SiO2Bulk, 'lmp_data', name='data.SiO2_veloc')
+    PrintStruct(SiO2Bulk, 'crystal_inp', name='INPUT_astools')
 
     # Creating bulk Si cell
 
@@ -29,7 +23,49 @@ def main() :
               Atom('Si', 4.7429, 4.7429, 4.7429)]
     SiBulk = AtomStruct(atlist, (5.42, 5.42, 5.42, 90.0, 90.0, 90.0))
     #PrintStruct(SiBulk, 'crystal_inp', name='INPUT_SiBulk')
-    expand(SiBulk, X=(-2.1, 2.1))
+    #newSi = expand(SiBulk, X=(-0.5, 0.5), Y=(-0.5, 0.5), Z=(-1.5, 1.3))
+    #PrintStruct(newSi, 'crystal_inp', name='INPUT_newSi')
+
+    ###################################################################
+    
+    ##################### CREATING STRUCTURE ########################## 
+
+    ###################################################################
+
+    # Flipping coordinates of cell
+    for at in SiO2Bulk.atoms:
+        tmp = at.z
+        at.z = at.y
+        at.y = tmp
+    tmp = SiO2Bulk.coordz
+    SiO2Bulk.coordz = SiO2Bulk.coordy
+    SiO2Bulk.coordy = tmp
+    # Setting the cell charge
+    for atom in SiO2Bulk.atoms :
+        atom.tags.append('oxide')
+        if atom.species == 'Si':
+            atom.Charge(2.0)
+        elif atom.species == 'O':
+            atom.Charge(-1.0)
+    
+    
+    new_struct = expand(SiBulk, Z = (-1., 1.))
+    new_struct.atoms.extend(SiO2Bulk.atoms)
+    for at in new_struct.atoms:
+        if 'oxide' in at.tags:
+            at.z = at.z + new_struct.coordz + 0.5
+            
+    # new coordinate
+    new_struct.coordz += SiO2Bulk.coordz + 1. 
+
+    for val in [distance(at_a, at_b) < 0.2 for at_a in new_struct.atoms \
+                for at_b in new_struct.atoms if at_a != at_b] :
+        if val == True :
+            print 'print WARNING', val
+
+    print 'Total number of atoms in structure', len(new_struct.atoms)
+    PrintStruct(new_struct, 'crystal_inp', name='INPUT_newstruct')
+
     print 'Done!'
 
 

@@ -33,24 +33,27 @@ def expand(structure, X = (0., 0.), Y = (0., 0.),
     
     """
 
+    # find multiplication integers (xn, xp, etc)
+    # also find boundaries we need to expand
     (xn, xp) = map(int, X) 
-    dnx = math.modf(X[0])[0]
-    dpx = math.modf(X[1])[0]
+    (dnx, dpx) = (math.modf(X[0])[0]*structure.coordx,
+                  math.modf(X[1])[0]*structure.coordx)
     (yn, yp) = map(int, Y) 
-    dny = math.modf(Y[0])[0]
-    dpy = math.modf(Y[1])[0]
+    (dny, dpy) = (math.modf(Y[0])[0]*structure.coordy, 
+                  math.modf(Y[1])[0]*structure.coordy)
     (zn, zp) = map(int, Z) 
-    dnz = math.modf(Z[0])[0]
-    dpz = math.modf(Z[1])[0]
+    (dnz, dpz) = (math.modf(Z[0])[0]*structure.coordz, 
+                  math.modf(Z[1])[0]*structure.coordz)
     #print xn, xp, range(xn, xp+1)
     #print yn, yp, range(yn, yp+1)
     #print zn, zp, range(zn, zp+1)
     #print dnx, dpx, dny, dpy, dnz, dpz
     # Initialising atom list
     ats  = []
+    # Expanding unit cell
     for xx, yy, zz in its.product(range(xn, xp+1), range(yn, yp+1), 
                                   range(zn, zp+1)):
-        print xx, yy, zz
+        #print xx, yy, zz
         for at in structure.atoms:
             at_ = Atom(at.species, at.x + xx*structure.coordx, 
                        at.y + yy*structure.coordy, 
@@ -61,9 +64,58 @@ def expand(structure, X = (0., 0.), Y = (0., 0.),
             except AttributeError:
                 at_.Charge(0.)
             ats.append(at_)
-
-
-    newstruct = AtomStruct(ats, (2., 2., 2., 90., 90., 
-                           90.))
-
+    # Expanding franctional boundaries
+    newats = [] 
+    for at in ats:
+        # lower atoms
+        if at.x < structure.coordx*xn + dpx:
+            newats.append(Atom(at.species, 
+                               at.x + structure.coordx*(-1*xn+xp+1.),
+                               at.y, at.z))
+        # higher atoms
+        if at.x > structure.coordx*(xp+1.) + dnx:
+            newats.append(Atom(at.species, 
+                               at.x - structure.coordx*(-1*xn+xp+1.),
+                               at.y, at.z))
+    ats.extend(newats)
+    newats = []
+    for at in ats:
+        # lower atoms
+        if at.y < structure.coordy*yn + dpy:
+            newats.append(Atom(at.species, at.x,
+                               at.y + structure.coordy*(-1*yn+yp+1.), at.z))
+        # higher atoms
+        if at.y > structure.coordy*(yp+1.) + dny:
+            newats.append(Atom(at.species, at.x,
+                               at.y - structure.coordy*(-1*yn+yp+1.), at.z))
+    ats.extend(newats)
+    newats = []
+    for at in ats:
+        # lower atoms
+        if at.z < structure.coordz*zn + dpz:
+            newats.append(Atom(at.species, at.x, at.y,
+                               at.z + structure.coordz*(-1*zn+zp+1.)))
+        # higher atoms
+        if at.z > structure.coordz*(zp+1.) + dnz:
+            newats.append(Atom(at.species, at.x, at.y,
+                               at.z - structure.coordz*(-1*zn+zp+1.)))
+    ats.extend(newats)
+    for at in ats:
+        at.x = at.x + structure.coordx*(-1*xn) + (-1)*dnx
+        at.y = at.y + structure.coordy*(-1*yn) + (-1)*dny
+        at.z = at.z + structure.coordz*(-1*zn) + (-1)*dnz
+    coord_tuple = (structure.coordx*(-1*xn+xp+1.) + (-1)*dnx + dpx, 
+                   structure.coordy*(-1*yn+yp+1.) + (-1)*dny + dpy,
+                   structure.coordz*(-1*zn+zp+1.) + (-1)*dnz + dpz, 
+                   structure.alpha, structure.beta, structure.gamma)
+        
+    newstruct = AtomStruct(ats, coord_tuple)
     return newstruct
+
+def distance(at1, at2) :
+    """Returns the distance between two atoms
+    (Atom, Atom) -> float
+    """
+    return math.sqrt((at1.x - at2.x)*(at1.x - at2.x) + 
+                     (at1.y - at2.y)*(at1.y - at2.y) +
+                     (at1.z - at2.z)*(at1.z - at2.z))

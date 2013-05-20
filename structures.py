@@ -49,6 +49,18 @@ class AtomStruct:
     def charge(self):
         return sum([atom.charge for atom in self.atoms])
 
+    def normalise(self):
+        """ Removes negative coordinates, all coordinates must fit box
+        (AtomStruct) -> None
+        """
+        for at in self.atoms:
+            if at.x < 0. :
+                at.x = self.coordx + at.x
+            if at.y < 0. :
+                at.y = self.coordy + at.y
+            if at.z < 0. :
+                at.z = self.coordz + at.z
+
 class StructIn:
     """
     reads in a slab structure, gets its x and y dimensions 
