@@ -40,6 +40,7 @@ def main() :
     tmp = SiO2Bulk.coordz
     SiO2Bulk.coordz = SiO2Bulk.coordy
     SiO2Bulk.coordy = tmp
+    SiO2Bulk = expand(SiO2Bulk, Z = (0., 1.))
     # Setting the cell charge
     for atom in SiO2Bulk.atoms :
         atom.tags.append('oxide')
@@ -49,22 +50,23 @@ def main() :
             atom.Charge(-1.0)
     
     
-    new_struct = expand(SiBulk, Z = (-1., 1.))
-    new_struct.atoms.extend(SiO2Bulk.atoms)
+    SiBulk = expand(SiBulk, Z = (-1., 1.))
+    new_struct = AtomStruct([x for x in SiBulk.atoms+SiO2Bulk.atoms],
+                            (SiBulk.coordx, SiBulk.coordy, 
+                             SiBulk.alpha), pb='slab')
     for at in new_struct.atoms:
         if 'oxide' in at.tags:
-            at.z = at.z + new_struct.coordz + 0.5
+            at.z = at.z + SiBulk.coordz + 0.5
             
-    # new coordinate
-    new_struct.coordz += SiO2Bulk.coordz + 1. 
 
-    for val in [distance(at_a, at_b) < 0.2 for at_a in new_struct.atoms \
+    for val in [distance(at_a, at_b) < .5 for at_a in new_struct.atoms \
                 for at_b in new_struct.atoms if at_a != at_b] :
         if val == True :
             print 'print WARNING', val
-
+    new_struct.atoms = set(new_struct.atoms)
     print 'Total number of atoms in structure', len(new_struct.atoms)
-    PrintStruct(new_struct, 'crystal_inp', name='INPUT_newstruct')
+    #PrintStruct(new_struct, 'crystal_inp', name='INPUT_newstruct')
+    PrintStruct(new_struct, 'lmp_data', name='data.SiO2_veloc')
 
     print 'Done!'
 

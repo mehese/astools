@@ -38,6 +38,9 @@ class AtomStruct:
         if coordstyle == 'Angles' and pb=='bulk':
             (self.coordx, self.coordy, self.coordz, 
              self.alpha, self.beta, self.gamma) = coords
+        elif coordstyle == 'Angles' and pb=='slab':
+            (self.coordx, self.coordy, 
+             self.alpha) = coords
         else :
             # Print and error message for unimplemented stuff and exit
             ERR = 'Can\'t do ( Angles = '+ str(coordstyle)+' and bp = '+ \

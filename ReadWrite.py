@@ -78,3 +78,18 @@ def PrintStruct(structure, filetype, name='PrintStruct.out'):
                          species2Z[atom.species], x_, y_, z_))
             f2.write('ENDGEOM\nSTOP\n')
             f2.close()
+        if structure.periodicity == 'slab':
+            f2 = open(name, 'w')
+            f2.write('Created with astools\nSLAB\n1\n')
+            f2.write('{:-g} {:-g} {:-3.5f}\n'.format(
+                     structure.coordx, structure.coordy, structure.alpha))
+            f2.write('{}\n'.format(len(structure.atoms)))
+            for atom in structure.atoms :
+                x_ = atom.x / structure.coordx # CRYSTAL input files require 
+                y_ = atom.y / structure.coordy # fractional coordinates
+                z_ = atom.z                    # but not for z coordinates in
+                                               # the case of slabs
+                f2.write('{:3} {: 15.9f} {: 15.9f} {: 15.9f}\n'.format(
+                         species2Z[atom.species], x_, y_, z_))
+            f2.write('ENDGEOM\nSTOP\n')
+            f2.close()

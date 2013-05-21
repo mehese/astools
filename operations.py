@@ -18,6 +18,7 @@ def repeat(structure, ex, ey, ez) :
             at_ = Atom(at.species, at.x + xx*structure.coordx, 
                        at.y + yy*structure.coordy, 
                        at.z + zz*structure.coordz)
+            at_.tags = list(at.tags)
             at_.Charge(at.charge)
             ats.append(at_)
 
@@ -59,6 +60,7 @@ def expand(structure, X = (0., 0.), Y = (0., 0.),
                        at.y + yy*structure.coordy, 
                        at.z + zz*structure.coordz)
             
+            at_.tags = at.tags
             try :
                 at_.Charge(at.charge)
             except AttributeError:
