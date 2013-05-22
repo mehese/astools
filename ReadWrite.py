@@ -36,7 +36,7 @@ def ReadStruct(filename, style='crystal'):
         print 'Bad File !!!'
         exit()
 
-def PrintStruct(structure, filetype, name='PrintStruct.out'):
+def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
     """Prints an AtomStruct to an ASCII file of desired format
     (AtomStruct, str) -> None
     """
@@ -56,11 +56,18 @@ def PrintStruct(structure, filetype, name='PrintStruct.out'):
         f2.write('\t%18.8f\t%18.8f\tylo yhi\n'%(0.0, structure.coordy))
         f2.write('\t%18.8f\t%18.8f\tzlo zhi\n'%(0.0, structure.coordz))
         f2.write('\nAtoms\n\n')
-        for i in range(len(structure.atoms)) :
-            f2.write('%6i\t%6i\t%7.4f %15.8f\t %15.8f\t %15.8f\t\n' \
-                     %(i+1, atom_types.index(structure.atoms[i].species) + 1,
-                       structure.atoms[i].charge, structure.atoms[i].x, 
-                       structure.atoms[i].y, structure.atoms[i].z))
+        if nocharge :
+            for i in range(len(structure.atoms)) :
+                f2.write('%6i\t%6i %15.8f\t %15.8f\t %15.8f\t\n' \
+                         %(i+1, atom_types.index(structure.atoms[i].species) \
+                           + 1, structure.atoms[i].x, structure.atoms[i].y, 
+                           structure.atoms[i].z))
+        else :
+            for i in range(len(structure.atoms)) :
+                f2.write('%6i\t%6i\t%7.4f %15.8f\t %15.8f\t %15.8f\t\n' \
+                         %(i+1, atom_types.index(structure.atoms[i].species) \
+                           + 1, structure.atoms[i].charge, 
+                           structure.atoms[i].x, structure.atoms[i].y, structure.atoms[i].z))
         f2.close()
     elif filetype == 'crystal_inp':
         if structure.periodicity == 'bulk':

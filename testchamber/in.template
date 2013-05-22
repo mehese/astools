@@ -1,0 +1,42 @@
+units           metal
+atom_style      charge
+boundary        p p s
+
+read_data       data.tmplate # generated automatically, -1 charge on O, -2 on Si, comme d'habitude 
+
+variable e equal pe
+
+dump myDump all atom 10 dump.tmplate
+
+#define atomic masses
+mass            1 28.086 # atom label 1 = SiO2 silicon
+group           type1 type 1
+compute         charge1 type1 property/atom q # computes the charge
+compute         q1 type1 reduce ave c_charge1 # q1 = average(charge1) for all charge1 ats
+mass            2 16.00	# atom label 2 = oxygen
+group           type2 type 2
+compute         charge2 type2 property/atom q # computes the charge
+compute         q2 type2 reduce ave c_charge2 # q2 = average(charge2) for all charge1 ats
+
+compute			pairdist all rdf 50 1 1 1 2 #see: http://lammps.sandia.gov/doc/compute_rdf.html
+
+pair_style      comb # comb 10, Sinnot et al.
+pair_coeff      * * ../lammps-6Dec12/potentials/ffield.comb Si O # Si & O are treated with COMB (?), * * -> used to span all atom types
+neighbor        2.0 bin
+neigh_modify    every 20 delay 0 check no 
+
+timestep        0.001
+
+thermo_style    custom step etotal vol
+
+fix             2 all qeq/comb 1 0.0005
+
+fix             4 all ave/time 10 1 10 c_pairdist file tmplate.rdf mode vector start 400 
+
+minimize        1.0e-7 1.0e-10 200 10000
+
+thermo          1
+run             50
+
+print "Final potential energy = $e"
+print "  !!!!  FINISHED  !!!!  "
