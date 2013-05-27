@@ -12,7 +12,6 @@ def main() :
     SiO2Bulk.normalise()
     #SiO2Bulk = repeat(SiO2Bulk, 3, 3, 3) 
     #PrintStruct(SiO2Bulk, 'lmp_data', name='data.SiO2_veloc')
-    PrintStruct(SiO2Bulk, 'crystal_inp', name='INPUT_astools')
 
     # Creating bulk Si cell
 
@@ -47,12 +46,14 @@ def main() :
     SiO2Bulk.normalise()
     # Setting the cell charge
     for atom in SiO2Bulk.atoms :
+        #atom.z = SiO2Bulk.coordz - atom.z
         atom.tags.append('oxide')
         if atom.species == 'Si':
             atom.Charge(2.0)
         elif atom.species == 'O':
             atom.Charge(-1.0)
     
+    PrintStruct(SiO2Bulk, 'crystal_inp', name='INPUT_astools')
     
     SiBulk = expand(SiBulk, Z = (-1., 1.))
     new_struct = AtomStruct([x for x in SiBulk.atoms+SiO2Bulk.atoms],
@@ -79,23 +80,24 @@ def main() :
     new_str_ats_cp = new_struct.atoms[:]
     #PrintStruct(new_struct, 'crystal_inp', name='INPUT_newstruct')
     j = 1
-    for x, y in it.product(np.arange(0., 
-                                     oldx/2., 0.3),
-                           np.arange(0., 
-                                     oldy/2., 0.3)): 
-        #print j 
-        j += 1
-        #print new_struct.coordx, new_struct.coordy, new_struct.coordx + x, \
-        #      new_struct.coordy + y
-        for i in range(len(new_struct.atoms)):
-            if 'oxide' in new_struct.atoms[i].tags :
-                new_struct.atoms[i].x = new_str_ats_cp[i].x + x
-                new_struct.atoms[i].y = new_str_ats_cp[i].y + y
-        PrintStruct(new_struct, 'lmp_data', 
-                    name='data.SiO2_offset_{:.2f}_{:.2f}'.format(x,y),
-                    nocharge=False)
-        # print x, y
+    #for x, y in it.product(np.arange(0., 
+    #                                 oldx/2., 0.3),
+    #                       np.arange(0., 
+    #                                 oldy/2., 0.3)): 
+    #    #print j 
+    #    j += 1
+    #    #print new_struct.coordx, new_struct.coordy, new_struct.coordx + x, \
+    #    #      new_struct.coordy + y
+    #    for i in range(len(new_struct.atoms)):
+    #        if 'oxide' in new_struct.atoms[i].tags :
+    #            new_struct.atoms[i].x = new_str_ats_cp[i].x + x
+    #            new_struct.atoms[i].y = new_str_ats_cp[i].y + y
+    #    PrintStruct(new_struct, 'lmp_data', 
+    #                name='data.SiO2_offset_{:.2f}_{:.2f}'.format(x,y),
+    #                nocharge=False)
+    #    # print x, y
 
+    PrintStruct(new_struct, 'crystal_inp', name='INPUT_interface')
     print 'Done!'
 
 

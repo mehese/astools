@@ -21,7 +21,7 @@ compute         q2 type2 reduce ave c_charge2 # q2 = average(charge2) for all ch
 compute			pairdist all rdf 50 1 1 1 2 #see: http://lammps.sandia.gov/doc/compute_rdf.html
 
 pair_style      comb # comb 10, Sinnot et al.
-pair_coeff      * * ../lammps-6Dec12/potentials/ffield.comb Si O # Si & O are treated with COMB (?), * * -> used to span all atom types
+pair_coeff      * * ../potentials/ffield.comb Si O # Si & O are treated with COMB (?), * * -> used to span all atom types
 neighbor        2.0 bin
 neigh_modify    every 20 delay 0 check no 
 
