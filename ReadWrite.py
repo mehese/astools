@@ -100,3 +100,29 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
                          species2Z[atom.species], x_, y_, z_))
             f2.write('ENDGEOM\nSTOP\n')
             f2.close()
+    elif filetype == 'castep_inp':
+        if structure.periodicity == 'bulk':
+            f2 = open(name, 'w')
+            types = set([nm.species for nm in structure.atoms])
+            f2.write('%block LATTICE_ABC\n')
+            f2.write('{:f} {:f} {:f}\n'.format(structure.coordx,
+                                               structure.coordy,
+                                               structure.coordz))
+            f2.write('{:f} {:f} {:f}\n'.format(structure.alpha,
+                                               structure.beta,
+                                               structure.gamma))
+            f2.write('%endblock LATTICE_ABC\n\n')
+            f2.write('%block positions_frac\n')
+            for at in structure.atoms:
+                f2.write('{}    {:f}    {:f}    {:f}\n'.format(
+                at.species.rjust(2), at.x/structure.coordx, 
+                at.y/structure.coordy, at.z/structure.coordz))
+            f2.write('%endblock positions_frac\n')
+            f2.write('\nfix all cell : true\n\n')
+            f2.write('kpoints_mp_grid 2 2 2\n\n')
+            f2.write('SYMMETRY_GENERATE\n\n')
+            f2.write('%block species_pot\n')
+            for s in types:
+                f2.write('{}   {}_00PBE_OP.recpot\n'.format(s, s))
+            f2.write('%endblock species_pot\n')
+            f2.close()

@@ -5,3 +5,5 @@
 data.*
 dump.*
 INPUT*
+*.cell
+*.xsf

@@ -73,7 +73,6 @@ def main() :
     #new_struct.atoms = set(new_struct.atoms)
     oldx = new_struct.coordx
     oldy = new_struct.coordy
-    print oldx
     new_struct = repeat(new_struct, 3, 3, 1)
 
     print 'Total number of atoms in structure', len(new_struct.atoms)
@@ -97,7 +96,8 @@ def main() :
     #                nocharge=False)
     #    # print x, y
 
-    PrintStruct(new_struct, 'crystal_inp', name='INPUT_interface')
+    #PrintStruct(new_struct, 'crystal_inp', name='INPUT_interface')
+    PrintStruct(new_struct, 'castep_inp', name='SiO2Si_2.cell')
     print 'Done!'
 
 
