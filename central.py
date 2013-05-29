@@ -73,7 +73,8 @@ def main() :
     #new_struct.atoms = set(new_struct.atoms)
     oldx = new_struct.coordx
     oldy = new_struct.coordy
-    new_struct = repeat(new_struct, 3, 3, 1)
+    new_struct.coordz = 39.
+    #new_struct = repeat(new_struct, 3, 3, 1)
 
     print 'Total number of atoms in structure', len(new_struct.atoms)
     new_str_ats_cp = new_struct.atoms[:]
@@ -97,10 +98,10 @@ def main() :
     #    # print x, y
 
     #PrintStruct(new_struct, 'crystal_inp', name='INPUT_interface')
-    PrintStruct(new_struct, 'castep_inp', name='SiO2Si_2.cell')
+    PrintStruct(new_struct, 'castep_inp', name='SiO2Si.cell')
     print 'Done!'
 
 
 # make sure the codelines don't get executed if we insert this as a module
-if __name__ == "__main__" :
+if __name__ == "__main__":
     main()
