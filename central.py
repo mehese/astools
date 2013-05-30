@@ -6,6 +6,7 @@ import itertools as it
 from structures import *
 from ReadWrite import *
 from operations import *
+from analysis import *
 
 def main() :
     SiO2Bulk = ReadStruct('CrystalCell', style='crystal')
@@ -46,7 +47,7 @@ def main() :
     SiO2Bulk.normalise()
     # Setting the cell charge
     for atom in SiO2Bulk.atoms :
-        #atom.z = SiO2Bulk.coordz - atom.z
+        atom.z = SiO2Bulk.coordz - atom.z
         atom.tags.append('oxide')
         if atom.species == 'Si':
             atom.Charge(2.0)
@@ -80,6 +81,15 @@ def main() :
     new_str_ats_cp = new_struct.atoms[:]
     #PrintStruct(new_struct, 'crystal_inp', name='INPUT_newstruct')
     j = 1
+    for x, y in [(2.4, 2.7), (0.0, 0.0), (1.2, 1.2), (2.4, 1.5),\
+                 (0.6, 2.1), (1.2, 0.6)]:
+       print '({}, {}) '.format(x, y),
+       for i in range(len(new_struct.atoms)):
+           if 'oxide' in new_struct.atoms[i].tags :
+               new_struct.atoms[i].x = new_str_ats_cp[i].x + x
+               new_struct.atoms[i].y = new_str_ats_cp[i].y + y
+       PrintStruct(new_struct, 'castep_inp', 
+                   name='SiO2_offset_{:.2f}_{:.2f}.cell'.format(x,y))
     #for x, y in it.product(np.arange(0., 
     #                                 oldx/2., 0.3),
     #                       np.arange(0., 
@@ -99,6 +109,7 @@ def main() :
 
     #PrintStruct(new_struct, 'crystal_inp', name='INPUT_interface')
     PrintStruct(new_struct, 'castep_inp', name='SiO2Si.cell')
+    #r, y = rdf(new_struct, 10)
     print 'Done!'
 
 

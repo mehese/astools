@@ -118,7 +118,7 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
                 at.species.rjust(2), at.x/structure.coordx, 
                 at.y/structure.coordy, at.z/structure.coordz))
             f2.write('%endblock positions_frac\n')
-            f2.write('\nfix all cell : true\n\n')
+            f2.write('\nfix_all_cell : true\n\n')
             f2.write('kpoints_mp_grid 2 2 2\n\n')
             f2.write('SYMMETRY_GENERATE\n\n')
             f2.write('%block species_pot\n')

@@ -3,6 +3,12 @@ import math
 import itertools as its
 #from __future__ import division
 
+##############################################################################
+#                                                                            #
+#    Contains functions that modify structures defined in structures.py      #
+#                                                                            #
+##############################################################################
+
 def repeat(structure, ex, ey, ez) :
     """Returns an (ex X ey X ez) widenened AtomStruct
     (AtomStruct, int, int, int) -> AtomStruct
@@ -60,7 +66,7 @@ def expand(structure, X = (0., 0.), Y = (0., 0.),
                        at.y + yy*structure.coordy, 
                        at.z + zz*structure.coordz)
             
-            at_.tags = at.tags
+            at_.tags = [tag for tag in at.tags if tag != 'original']
             try :
                 at_.Charge(at.charge)
             except AttributeError:
@@ -114,10 +120,3 @@ def expand(structure, X = (0., 0.), Y = (0., 0.),
     newstruct = AtomStruct(ats, coord_tuple)
     return newstruct
 
-def distance(at1, at2) :
-    """Returns the distance between two atoms
-    (Atom, Atom) -> float
-    """
-    return math.sqrt((at1.x - at2.x)*(at1.x - at2.x) + 
-                     (at1.y - at2.y)*(at1.y - at2.y) +
-                     (at1.z - at2.z)*(at1.z - at2.z))
