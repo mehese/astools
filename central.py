@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+import random as rn
 import itertools as it
 
 from structures import *
@@ -54,7 +55,7 @@ def main() :
         elif atom.species == 'O':
             atom.Charge(-1.0)
     
-    PrintStruct(SiO2Bulk, 'crystal_inp', name='INPUT_astools')
+    #PrintStruct(SiO2Bulk, 'crystal_inp', name='INPUT_oxide')
     
     SiBulk = expand(SiBulk, Z = (-1., 1.))
     new_struct = AtomStruct([x for x in SiBulk.atoms+SiO2Bulk.atoms],
@@ -64,7 +65,7 @@ def main() :
                              pb='bulk')
     for at in new_struct.atoms:
         if 'oxide' in at.tags:
-            at.z = at.z + SiBulk.coordz + 0.5
+            at.z = at.z + SiBulk.coordz + 0.1
             
 
     for val in [distance(at_a, at_b) < .5 for at_a in new_struct.atoms \
@@ -75,40 +76,34 @@ def main() :
     oldx = new_struct.coordx
     oldy = new_struct.coordy
     new_struct.coordz = 39.
-    #new_struct = repeat(new_struct, 3, 3, 1)
+    new_struct = repeat(new_struct, 3, 3, 1)
 
     print 'Total number of atoms in structure', len(new_struct.atoms)
     new_str_ats_cp = new_struct.atoms[:]
     #PrintStruct(new_struct, 'crystal_inp', name='INPUT_newstruct')
     j = 1
-    for x, y in [(2.4, 2.7), (0.0, 0.0), (1.2, 1.2), (2.4, 1.5),\
-                 (0.6, 2.1), (1.2, 0.6)]:
-       print '({}, {}) '.format(x, y),
-       for i in range(len(new_struct.atoms)):
-           if 'oxide' in new_struct.atoms[i].tags :
-               new_struct.atoms[i].x = new_str_ats_cp[i].x + x
-               new_struct.atoms[i].y = new_str_ats_cp[i].y + y
-       PrintStruct(new_struct, 'castep_inp', 
-                   name='SiO2_offset_{:.2f}_{:.2f}.cell'.format(x,y))
-    #for x, y in it.product(np.arange(0., 
-    #                                 oldx/2., 0.3),
-    #                       np.arange(0., 
-    #                                 oldy/2., 0.3)): 
-    #    #print j 
-    #    j += 1
-    #    #print new_struct.coordx, new_struct.coordy, new_struct.coordx + x, \
-    #    #      new_struct.coordy + y
-    #    for i in range(len(new_struct.atoms)):
-    #        if 'oxide' in new_struct.atoms[i].tags :
-    #            new_struct.atoms[i].x = new_str_ats_cp[i].x + x
-    #            new_struct.atoms[i].y = new_str_ats_cp[i].y + y
-    #    PrintStruct(new_struct, 'lmp_data', 
-    #                name='data.SiO2_offset_{:.2f}_{:.2f}'.format(x,y),
-    #                nocharge=False)
-    #    # print x, y
-
-    #PrintStruct(new_struct, 'crystal_inp', name='INPUT_interface')
-    PrintStruct(new_struct, 'castep_inp', name='SiO2Si.cell')
+    k = 0
+    for x, y in it.product(np.arange(0., 
+                                     oldx/2., 0.1),
+                           np.arange(0., 
+                                     oldy/2., 0.1)): 
+        #print j
+        # if rn.random()*100 < 2.:
+        #     k += 1
+        #     PrintStruct(new_struct, 'castep_inp', 
+        #                 name='SiO2_offset_{:.2f}_{:.2f}.cell'.format(x,y))
+        # j += 1
+        for i in range(len(new_struct.atoms)):
+            if 'oxide' in new_struct.atoms[i].tags :
+                new_struct.atoms[i].x = new_str_ats_cp[i].x + x
+                new_struct.atoms[i].y = new_str_ats_cp[i].y + y
+        PrintStruct(new_struct, 'lmp_data', 
+                    name='data.SiO2_offset_{:.2f}_{:.2f}'.format(x,y),
+                    nocharge=False)
+        # print x, y
+    # print k 
+    PrintStruct(new_struct, 'crystal_inp', name='INPUT_interface')
+    #PrintStruct(new_struct, 'castep_inp', name='SiO2Si.cell')
     #r, y = rdf(new_struct, 10)
     print 'Done!'
 

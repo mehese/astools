@@ -66,7 +66,10 @@ def expand(structure, X = (0., 0.), Y = (0., 0.),
                        at.y + yy*structure.coordy, 
                        at.z + zz*structure.coordz)
             
-            at_.tags = [tag for tag in at.tags if tag != 'original']
+            if (xx, yy, zz) == (0, 0, 0):
+                at_.tags = at.tags
+            else:
+                at_.tags = [tag for tag in at.tags if tag != 'original']
             try :
                 at_.Charge(at.charge)
             except AttributeError:

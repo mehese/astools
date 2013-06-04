@@ -1,5 +1,5 @@
 # no vim swap files
-*.sw[po]
+*.sw[npo]
 # no python compiled files to be stored
 *.py[co]
 data.*

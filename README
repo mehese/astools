@@ -2,12 +2,8 @@ Tools to use in manipulating structures
 
 TO DO NOW:
 
-	- create print_struct(Struct, format='xyz') function to print the
-	  structrure in the desired format
-	- create function read_struct(textfile) that should 
-	  return (cell_params, [list of Atom objects])
-	- Structin should take a list of Atom objects + cell 
-	  params
+	- remember to rescale the x, y dimensions of the SiO2 cell so it fits
+	  perfectly the Si cell
 
 TO DO AFTER NOW (still ASAP, new .py file) :
 
@@ -15,3 +11,4 @@ TO DO AFTER NOW (still ASAP, new .py file) :
 	- calculate & plot pair distribution function
 		rdf(StructAts, radius, **pair labels)
 		return structure rdf
+	- velocity autocorrelation function
