@@ -1,18 +1,15 @@
-clear 
-
+# units set to angstroem, eV, etc
 units           metal
+# atomic style, point charge
 atom_style      charge
+# periodic boundary conditions
 boundary        p p p
 
-read_data       data.SiO2tomelt # generated automatically, -1 charge on O, -2 on Si, comme d'habitude 
+# input geometry put in data.cr2lmp
+read_data       data.cr2lmp   #	  generated automatically, -1 charge on O, -2 on Si, comme d'habitude 
 
-variable e equal pe
-variable t equal etotal
-
-
-dump myDump all custom 1 dump.SiO2tomelt id mass x y z q
-
-#print "Initial potential energy = $e"
+# outputs optimization steps in dump.SiSiO2, every 10 steps, outputs all atoms in atom coordinates
+dump myDump all atom 10 dump.SiO2Si_try1
 
 #define atomic masses
 mass            1 28.086 # atom label 1 = SiO2 silicon
@@ -23,23 +20,30 @@ mass            2 16.00	# atom label 2 = oxygen
 group           type2 type 2
 compute         charge2 type2 property/atom q # computes the charge
 compute         q2 type2 reduce ave c_charge2 # q2 = average(charge2) for all charge1 ats
+mass            3 28.086 # atom label 3 = bulk silicon
+group           type3 type 3
+compute         charge3 type3 property/atom q # computes the charge
+compute         q3 type3 reduce ave c_charge3 # q2 = average(charge2) for all charge1 ats
 
-compute			pairdist all rdf 50 1 1 1 2 #see: http://lammps.sandia.gov/doc/compute_rdf.html
+compute			pairdist all rdf 50 1 1 1 2 3 3 #see: http://lammps.sandia.gov/doc/compute_rdf.html
 
 pair_style      comb # comb 10, Sinnot et al.
-pair_coeff      * * /home/eric/lammps-6Dec12/potentials/ffield.comb Si O # Si & O are treated with COMB (?), * * -> used to span all atom types
+pair_coeff      * * ../potentials/ffield.comb Si O Si # Si & O are treated with COMB (?), * * -> used to span all atom types
 neighbor        2.0 bin
 neigh_modify    every 20 delay 0 check no 
 
 timestep        0.001
 
-thermo_style    custom step etotal vol
+thermo_style    custom step etotal vol press temp 
 
-fix             1 all npt temp 4000.00 3000.00 .001 iso 1.0 1.0 1000.0 
+fix             1 all npt temp 3000.00 3000.00 .001 iso 1.0 1.0 1000.0 
 fix             2 all qeq/comb 1 0.0005
 
+# something about the box allowed to relax
+#fix             3 all box/relax z 0.0 
+
 # print pair distribution function
-fix             4 all ave/time 10 1 10 c_pairdist[1] c_pairdist[2] c_pairdist[3] file SiO2Sitomelt.rdf mode vector start 400 
+fix             4 all ave/time 10 1 10 c_pairdist[1] c_pairdist[2] c_pairdist[3] file SiO2Si.rdf mode vector start 400 
 
 #velocity       all create 10.0 277387
 
@@ -51,22 +55,6 @@ thermo          5
 # runs a 3000 steps optimization
 run             5000
 
-print "Final potential energy = $e"
-print "Final total energy = $t"
 print "                        "
 print "  !!!!  FINISHED  !!!!  "
 print "                        "
-
-#fix				freeze all setforce 0.0 0.0 0.0
-
-print "Initial potential energy = $e"
-
-#fix             4 all ave/time 1 1 1 c_pairdist file SiO2test.rdf mode vector start 1 
-#
-#min_style		cg
-#minimize        1.0e-9 1.0e-14 9000 9000000
-
-# thermo          30
-# print "Initial potential energy = $e"
-# print "Initial total energy = $e"
-# run             150

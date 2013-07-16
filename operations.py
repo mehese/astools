@@ -83,11 +83,13 @@ def expand(structure, X = (0., 0.), Y = (0., 0.),
             newats.append(Atom(at.species, 
                                at.x + structure.coordx*(-1*xn+xp+1.),
                                at.y, at.z))
+            newats[-1].tags = [tag for tag in at.tags if tag != 'original']
         # higher atoms
         if at.x > structure.coordx*(xp+1.) + dnx:
             newats.append(Atom(at.species, 
                                at.x - structure.coordx*(-1*xn+xp+1.),
                                at.y, at.z))
+            newats[-1].tags = [tag for tag in at.tags if tag != 'original']
     ats.extend(newats)
     newats = []
     for at in ats:
@@ -95,10 +97,12 @@ def expand(structure, X = (0., 0.), Y = (0., 0.),
         if at.y < structure.coordy*yn + dpy:
             newats.append(Atom(at.species, at.x,
                                at.y + structure.coordy*(-1*yn+yp+1.), at.z))
+            newats[-1].tags = [tag for tag in at.tags if tag != 'original']
         # higher atoms
         if at.y > structure.coordy*(yp+1.) + dny:
             newats.append(Atom(at.species, at.x,
                                at.y - structure.coordy*(-1*yn+yp+1.), at.z))
+            newats[-1].tags = [tag for tag in at.tags if tag != 'original']
     ats.extend(newats)
     newats = []
     for at in ats:
@@ -106,10 +110,12 @@ def expand(structure, X = (0., 0.), Y = (0., 0.),
         if at.z < structure.coordz*zn + dpz:
             newats.append(Atom(at.species, at.x, at.y,
                                at.z + structure.coordz*(-1*zn+zp+1.)))
+            newats[-1].tags = [tag for tag in at.tags if tag != 'original']
         # higher atoms
         if at.z > structure.coordz*(zp+1.) + dnz:
             newats.append(Atom(at.species, at.x, at.y,
                                at.z - structure.coordz*(-1*zn+zp+1.)))
+            newats[-1].tags = [tag for tag in at.tags if tag != 'original']
     ats.extend(newats)
     for at in ats:
         at.x = at.x + structure.coordx*(-1*xn) + (-1)*dnx

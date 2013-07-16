@@ -1,0 +1,13 @@
+xc_functional : PBE 
+max_scf_cycles   : 250
+task : GeometryOptimization 
+geom_method : bfgs
+num_backup_iter : 1
+#opt_strategy : speed
+opt_strategy : memory
+iprint : 2
+basis_precision : precise
+nextra_bands : 26
+#xc_functional : SHF-LDA
+#metals_method : edft
+#spin_polarised : true

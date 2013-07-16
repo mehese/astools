@@ -31,14 +31,16 @@ def rdf(structure, nbin, dist=25.):
     
     # counting the number of atoms at certain distance intervals
 
-    #for d in [distance(at1, at2) for at1 in newstr[:len(structure.atoms)] \
-    #          for at2 in newstr if distance(at1, at2) < dist and \
-    #          distance(at1, at2) > 1e-5]:
     for d in [distance(at1, at2) for at1 in newstr[:len(structure.atoms)] \
               for at2 in newstr if 1e-5 < distance(at1, at2) < dist]:
         for i in range(len(r)):
             if (r[i] - dr) <= d < (r[i] + dr):
-                g[i] += 1
+                g[i] += 1.
+
+    # normalising with respect to the radius
+
+    for i in range(len(r)):
+        g[i] = g[i]/(6*r[i]*r[i]*dr + 2*dr*dr*dr)
 
     # print sorted([(at, distance(i, atom)) for at in structure.atoms], 
     #         key=itemgetter(1))
@@ -55,8 +57,10 @@ def main():
               Atom('Si', 4.7429, 4.7429, 4.7429)]
     SiBulk = AtomStruct(atlist, (5.42, 5.42, 5.42, 90.0, 90.0, 90.0))
 
-    x, y = rdf (SiBulk, 100)
+    x, y = rdf (SiBulk, 60, dist=20.)
     plt.plot(x, y, 'k-')
+    plt.xlabel('distance $r$ ($\\AA$)')
+    plt.ylabel('$g(r)$')
     plt.show()
     print 'Done!'
 
