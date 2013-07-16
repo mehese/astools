@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from structures import *
 
 # Dictionary that changes the Z to a string defining the atom species
@@ -5,7 +7,7 @@ from structures import *
 Z2species = {1:'H', 2:'He', 8:'O', 14:'Si', 72:'Hf'}
 species2Z = {v:k for k, v in Z2species.items()}
 
-def ReadStruct(filename, style='crystal'):
+def ReadStruct(filename, style='crystal', pos=-1):
     """ Reads and input file and returns an AtomStruct
     (str, str) -> AtomStruct
     """
@@ -31,8 +33,30 @@ def ReadStruct(filename, style='crystal'):
         else:
             print 'Bad File !!!'
             exit()
+    if style == 'lmp_dump':
+        f = open(filename, 'r').read()
+        dats=[a for a in f.split('ITEM: BOX BOUNDS')[-1].split('\n')[1:] if \
+              a != '']
+        cx = map(float, dats[0].split())
+        cx = cx[1] - cx[0]
+        cy = map(float, dats[1].split())
+        cy = cy[1] - cy[0]
+        cz = map(float, dats[2].split())
+        cz = cz[1] - cz[0]
+        #print cx, cy, cz
+        atoms = []
+        for line in dats[4:] :
+            a = line.split()
+            spec = Z2species[int(float(a[1]))/2]
+            x, y, z, q = tuple(map(float, a[2:])) 
+            at = Atom(spec, x, y, z)
+            at.Charge(q)
+            atoms.append(at)
+        cds = (cx, cy, cz, 90., 90., 90.)
+        crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk')
+        return crystal
+
     else:
-    
         print 'Bad File !!!'
         exit()
 
@@ -126,3 +150,10 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
                 f2.write('{}   {}_00PBE_OP.recpot\n'.format(s, s))
             f2.write('%endblock species_pot\n')
             f2.close()
+
+def main():
+    str1 = ReadStruct('dump.SiO2tomelt', style='lmp_dump')
+    PrintStruct(str1, 'crystal_inp')
+
+if __name__ == "__main__" :
+    main()
