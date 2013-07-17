@@ -17,8 +17,10 @@ def chargey(struct):
             at.Charge(-1.0)
 
 def main() :
-    SiO2Bulk = ReadStruct('CrystalCell', style='crystal')
+    SiO2Bulk = ReadStruct('dump.SiO2tomelt', style='lmp_dump')
     SiO2Bulk.normalise()
+    for at in SiO2Bulk.atoms:
+        at.tags.append('oxide')
 
     # Creating bulk Si cell
 
@@ -33,31 +35,24 @@ def main() :
     SiBulk = AtomStruct(atlist, (5.42, 5.42, 5.42, 90.0, 90.0, 90.0))
     for atom in SiBulk.atoms:
         atom.Charge(0.0)
+    SiBulk = repeat(SiBulk, 2, 2, 2)
 
-    # Flipping coordinates of cell
-    for at in SiO2Bulk.atoms:
-        tmp = at.z
-        at.z = at.y
-        at.y = tmp
-    tmp = SiO2Bulk.coordz
-    SiO2Bulk.coordz = SiO2Bulk.coordy
-    SiO2Bulk.coordy = tmp
-    #SiO2Bulk = expand(SiO2Bulk, Z = (0., 1.))
     SiO2Bulk.normalise()
+    cds = (SiBulk.coordx, SiBulk.coordy,
+           SiBulk.coordz + SiO2Bulk.coordz,
+           90., 90., 90.)
+    newstruct = AtomStruct(SiBulk.atoms+SiO2Bulk.atoms, cds)
+    for at in newstruct.atoms:
+        if 'oxide' in at.tags:
+            at.z = SiBulk.coordz + at.z
     # Setting the cell charge
     #SiO2Bulk = expand(SiO2Bulk, X = (0., 1.), Y=(0., 1.), Z=(0., 0.5))
-    chargey(SiO2Bulk)
-    SiO2Bulk = repeat(SiO2Bulk, 2, 2, 1)
-    SiO2Bulk = expand(SiO2Bulk, Z=(0., 0.5))
-    chargey(SiO2Bulk)
-    print SiO2Bulk.charge()
 
-    PrintStruct(SiO2Bulk, 'crystal_inp', name='INPUT_oxide')
-    PrintStruct(SiO2Bulk, 'lmp_data', name='data.SiO2tomelt')
+    PrintStruct(newstruct, 'crystal_inp', name='INPUT_layers')
 
     #SiBulk = expand(SiBulk, Z = (-1., 1.))
 
-
+    print 'Structure has', len(newstruct.atoms), 'atoms'
     print 'Done!'
 
 
