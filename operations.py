@@ -1,4 +1,7 @@
+#!/usr/bin/env python
+
 from structures import *
+from ReadWrite import *
 import math
 import itertools as its
 #from __future__ import division
@@ -129,3 +132,36 @@ def expand(structure, X = (0., 0.), Y = (0., 0.),
     newstruct = AtomStruct(ats, coord_tuple)
     return newstruct
 
+def slab_hfo2(structure, X, Y, Z) :
+    ats = []
+    cx = structure.coordx*X
+    cy = structure.coordy*Y
+    # sin(9.419 deg) = 0.1636531
+    # cos(9.419 deg) = 0.9865179
+    cz = structure.coordz*Z*0.9865179
+
+    print cx, cy
+    for i, j in its.product(range(X),
+                            range(Y)):
+        print i, j
+        for at in structure.atoms:
+            x = at.x + i*structure.coordx
+            y = at.y + j*structure.coordx
+            z = at.z
+            spec = at.species
+            at_ = Atom(spec, x, y, z)
+            ats.append(at_)
+    crystal = AtomStruct(ats, (cx, cy, cz, 90., 90., 90.))
+
+    return crystal
+
+def main():
+    HfO2 = ReadStruct('HfO2_out', style='crystal_out')
+    HfO2 = slab_hfo2(HfO2, 2, 2, 1)
+    PrintStruct(HfO2, 'crystal_inp', name='INPUT_newcell_hfo2')
+    print 'Done!'
+
+
+# make sure the codelines don't get executed if we insert this as a module
+if __name__ == "__main__":
+    main()

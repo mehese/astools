@@ -33,6 +33,23 @@ def ReadStruct(filename, style='crystal', pos=-1):
         else:
             print 'Bad File !!!'
             exit()
+    if style == 'crystal_out':
+        f = open(filename, 'r').read()
+        print 'opened', filename
+        c = f.split('CARTESIAN COORDINATES')[-2].split('PRIMITIVE CELL')[-1]
+        cds = tuple(map(float, c.split('\n')[2].split()))
+        c = f.split('CARTESIAN COORDINATES')[-1].split('\n')[4:50]
+        i = 0
+        atoms = []
+        while c[i].split() != [] :
+            l = c[i].split()
+            spec = l[2][0] + l[2][1:].lower()
+            x, y, z = tuple(map(float, l[3:]))
+            at = Atom(spec, x, y, z)
+            atoms.append(at)
+            i += 1
+        crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk')
+        return crystal
     if style == 'lmp_dump':
         f = open(filename, 'r').read()
         dats=[a for a in f.split('ITEM: BOX BOUNDS')[-1].split('\n')[1:] if \
@@ -152,8 +169,9 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
             f2.close()
 
 def main():
-    str1 = ReadStruct('dump.SiO2tomelt', style='lmp_dump')
-    PrintStruct(str1, 'crystal_inp')
+    #str1 = ReadStruct('dump.SiO2tomelt', style='lmp_dump')
+    HfO2 = ReadStruct('HfO2_out', style='crystal_out')
+    PrintStruct(HfO2, 'crystal_inp')
 
 if __name__ == "__main__" :
     main()

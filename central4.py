@@ -17,42 +17,37 @@ def chargey(struct):
             at.Charge(-1.0)
 
 def main() :
-    SiO2Bulk = ReadStruct('dump.SiO2tomelt', style='lmp_dump')
-    SiO2Bulk.normalise()
-    for at in SiO2Bulk.atoms:
-        at.tags.append('oxide')
+    #SiO2Bulk = ReadStruct('dump.SiO2tomelt', style='lmp_dump')
+    #SiO2Bulk.normalise()
+    #for at in SiO2Bulk.atoms:
+    #    at.tags.append('oxide')
 
-    # Creating bulk Si cell
+    ## Creating bulk Si cell
 
-    atlist = [Atom('Si', 0.6779, 0.6779, 0.6779), 
-              Atom('Si', 3.3879, 3.3879, 0.6779),
-              Atom('Si', 2.0329, 4.7429, 2.0329),
-              Atom('Si', 4.7429, 2.0329, 2.0329),
-              Atom('Si', 0.6779, 3.3879, 3.3879),
-              Atom('Si', 3.3879, 0.6779, 3.3879),
-              Atom('Si', 2.0329, 2.0329, 4.7429),
-              Atom('Si', 4.7429, 4.7429, 4.7429)]
-    SiBulk = AtomStruct(atlist, (5.42, 5.42, 5.42, 90.0, 90.0, 90.0))
-    for atom in SiBulk.atoms:
-        atom.Charge(0.0)
-    SiBulk = repeat(SiBulk, 2, 2, 2)
+    #atlist = [Atom('Si', 0.6779, 0.6779, 0.6779), 
+    #          Atom('Si', 3.3879, 3.3879, 0.6779),
+    #          Atom('Si', 2.0329, 4.7429, 2.0329),
+    #          Atom('Si', 4.7429, 2.0329, 2.0329),
+    #          Atom('Si', 0.6779, 3.3879, 3.3879),
+    #          Atom('Si', 3.3879, 0.6779, 3.3879),
+    #          Atom('Si', 2.0329, 2.0329, 4.7429),
+    #          Atom('Si', 4.7429, 4.7429, 4.7429)]
+    #SiBulk = AtomStruct(atlist, (5.42, 5.42, 5.42, 90.0, 90.0, 90.0))
+    #for atom in SiBulk.atoms:
+    #    atom.Charge(0.0)
+    #SiBulk = repeat(SiBulk, 2, 2, 2)
 
-    SiO2Bulk.normalise()
-    cds = (SiBulk.coordx, SiBulk.coordy,
-           SiBulk.coordz + SiO2Bulk.coordz,
-           90., 90., 90.)
-    newstruct = AtomStruct(SiBulk.atoms+SiO2Bulk.atoms, cds)
-    for at in newstruct.atoms:
-        if 'oxide' in at.tags:
-            at.z = SiBulk.coordz + at.z
-    # Setting the cell charge
-    #SiO2Bulk = expand(SiO2Bulk, X = (0., 1.), Y=(0., 1.), Z=(0., 0.5))
-
-    PrintStruct(newstruct, 'crystal_inp', name='INPUT_layers')
-
-    #SiBulk = expand(SiBulk, Z = (-1., 1.))
-
-    print 'Structure has', len(newstruct.atoms), 'atoms'
+    #SiO2Bulk.normalise()
+    #cds = (SiBulk.coordx, SiBulk.coordy,
+    #       SiBulk.coordz + SiO2Bulk.coordz,
+    #       90., 90., 90.)
+    #newstruct = AtomStruct(SiBulk.atoms+SiO2Bulk.atoms, cds)
+    #for at in newstruct.atoms:
+    #    if 'oxide' in at.tags:
+    #        at.z = SiBulk.coordz + at.z
+    #PrintStruct(newstruct, 'crystal_inp', name='INPUT_layers')
+    #print 'Structure has', len(newstruct.atoms), 'atoms'
+    HfO2 = ReadStruct('HfO2_out', style='crystal_out')
     print 'Done!'
 
 
