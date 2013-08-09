@@ -35,7 +35,8 @@ def main() :
     SiBulk = AtomStruct(atlist, (5.42, 5.42, 5.42, 90.0, 90.0, 90.0))
     for atom in SiBulk.atoms:
         atom.Charge(0.0)
-    SiBulk = repeat(SiBulk, 2, 2, 2)
+    SiBulk = repeat(SiBulk, 2, 2, 1)
+    SiBulk = expand(SiBulk, Z=(0., 0.5))
 
     SiO2Bulk.normalise()
     cds = (SiBulk.coordx, SiBulk.coordy,
@@ -45,22 +46,12 @@ def main() :
     for at in newstruct.atoms:
         if 'oxide' in at.tags:
             at.z = SiBulk.coordz + at.z
-    HfO2 = ReadStruct('HfO2_out', style='crystal_out')
-    HfO2 = slab_hfo2(HfO2, 2, 2, 1.0)
-    HfO2.normalise()
-    for at in HfO2.atoms:
-        at.tags.append('hfo2')
-    #newstruct.atoms.extend(HfO2.atoms) 
-    #newstruct.coordz += HfO2.coordz 
     for at in newstruct.atoms:
-        if 'hfo2' in at.tags:
-            at.z += newstruct.coordz - 5.
-            at.x = (at.x * newstruct.coordx)/ HfO2.coordx
-            at.y = (at.y * newstruct.coordy)/ HfO2.coordy
-        elif 'oxide' in at.tags:
+        if 'oxide' in at.tags:
             at.x = (at.x * newstruct.coordx)/ SiO2Bulk.coordx
             at.y = (at.y * newstruct.coordy)/ SiO2Bulk.coordy
     PrintStruct(newstruct, 'castep_inp', name='SiO2Si.cell')
+    PrintStruct(newstruct, 'crystal_inp', name='INPUT_SiO2Si')
     print 'Structure has', len(newstruct.atoms), 'atoms'
     print 'Done!'
 

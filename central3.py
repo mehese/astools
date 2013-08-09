@@ -48,7 +48,7 @@ def main() :
     #SiO2Bulk = expand(SiO2Bulk, X = (0., 1.), Y=(0., 1.), Z=(0., 0.5))
     chargey(SiO2Bulk)
     SiO2Bulk = repeat(SiO2Bulk, 2, 2, 1)
-    SiO2Bulk = expand(SiO2Bulk, Z=(0., 0.5))
+    SiO2Bulk = expand(SiO2Bulk, Z=(0., 0.2))
     chargey(SiO2Bulk)
     print SiO2Bulk.charge()
 

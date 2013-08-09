@@ -138,12 +138,12 @@ def slab_hfo2(structure, X, Y, Z) :
     cy = structure.coordy*Y
     # sin(9.419 deg) = 0.1636531
     # cos(9.419 deg) = 0.9865179
-    cz = structure.coordz*Z*0.9865179
+    h = structure.coordz*0.9865179
+    dx = structure.coordz*0.1636531
 
-    print cx, cy
     for i, j in its.product(range(X),
                             range(Y)):
-        print i, j
+        #print i, j
         for at in structure.atoms:
             x = at.x + i*structure.coordx
             y = at.y + j*structure.coordx
@@ -151,13 +151,23 @@ def slab_hfo2(structure, X, Y, Z) :
             spec = at.species
             at_ = Atom(spec, x, y, z)
             ats.append(at_)
-    crystal = AtomStruct(ats, (cx, cy, cz, 90., 90., 90.))
+    structure.atoms = ats[:]
+    for i in range(1,int(Z)) :
+        for at in structure.atoms:
+            x = at.x - dx*i  
+            y = at.y
+            z = at.z + h*i
+            spec = at.species
+            at_ = Atom(spec, x, y, z)
+            ats.append(at_)
 
+    cz = h*Z
+    crystal = AtomStruct(ats, (cx, cy, cz, 90., 90., 90.))
     return crystal
 
 def main():
     HfO2 = ReadStruct('HfO2_out', style='crystal_out')
-    HfO2 = slab_hfo2(HfO2, 2, 2, 1)
+    HfO2 = slab_hfo2(HfO2, 2, 2, 1.0)
     PrintStruct(HfO2, 'crystal_inp', name='INPUT_newcell_hfo2')
     print 'Done!'
 
