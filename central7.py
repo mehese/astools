@@ -39,14 +39,14 @@ def main() :
 
     SiO2Bulk.normalise()
     cds = (SiBulk.coordx, SiBulk.coordy,
-           SiBulk.coordz + SiO2Bulk.coordz,
+           SiO2Bulk.coordz,
            90., 90., 90.)
-    newstruct = AtomStruct(SiBulk.atoms+SiO2Bulk.atoms, cds)
+    newstruct = AtomStruct(SiO2Bulk.atoms, cds)
     for at in newstruct.atoms:
         if 'oxide' in at.tags:
             at.z = SiBulk.coordz + at.z
     HfO2 = ReadStruct('HfO2_out', style='crystal_out')
-    HfO2 = slab_hfo2(HfO2, 2, 2, 1.0)
+    HfO2 = slab_hfo2(HfO2, 2, 2, 2.0)
     HfO2.normalise()
     for at in HfO2.atoms:
         at.tags.append('hfo2')
@@ -60,7 +60,9 @@ def main() :
         elif 'oxide' in at.tags:
             at.x = (at.x * newstruct.coordx)/ SiO2Bulk.coordx
             at.y = (at.y * newstruct.coordy)/ SiO2Bulk.coordy
-    PrintStruct(newstruct, 'castep_inp', name='SiO2SiHf.cell')
+            at.z = at.z - 5.
+        at.z = at.z - 5.
+    PrintStruct(newstruct, 'castep_inp', name='HfSiO2.cell')
     print 'Structure has', len(newstruct.atoms), 'atoms'
     print 'Done!'
 
