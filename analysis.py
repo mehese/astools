@@ -13,7 +13,7 @@ def distance(at1, at2):
 
 def rdf(structure, nbin, dist=25.):
     """Returns the pair distribution function for a system in nbin bins
-    (AtomStruct, int) -> (list, list)
+    (AtomStruct, int, float) -> (list, list)
     """
     for atom in structure.atoms:
         atom.tags.append('original')
@@ -45,6 +45,12 @@ def rdf(structure, nbin, dist=25.):
     # print sorted([(at, distance(i, atom)) for at in structure.atoms], 
     #         key=itemgetter(1))
     return (r, g)
+
+def pairof4(structure, nbin):
+    """Returns nearest 4 neighbours, and next nearest 4 neighbours
+    (AtomStruct, int) -> ((list, list), (list, list))
+    """
+    pass
 
 def main():
     atlist = [Atom('Si', 0.6779, 0.6779, 0.6779), 
