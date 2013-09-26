@@ -1,7 +1,10 @@
+#! /usr/bin/env python
+
 import numpy as np
 import matplotlib.pylab as plt
 from operations import *
 from operator import itemgetter, attrgetter
+from itertools import product
 
 def distance(at1, at2):
     """Returns the distance between two atoms
@@ -46,11 +49,39 @@ def rdf(structure, nbin, dist=25.):
     #         key=itemgetter(1))
     return (r, g)
 
-def pairof4(structure, nbin):
+def pairof4(structure, dmax = 10.):
     """Returns nearest 4 neighbours, and next nearest 4 neighbours
     (AtomStruct, int) -> ((list, list), (list, list))
+
     """
-    pass
+    for atom in structure.atoms:
+        atom.tags.append('original')
+    dlist = []
+
+    # expand the structure all the way to dmax
+    newstr = expand(structure,
+                    X=(-dmax/structure.coordx, dmax/structure.coordx),
+                    Y=(-dmax/structure.coordx, dmax/structure.coordx),
+                    Z=(-dmax/structure.coordx, dmax/structure.coordx))
+    
+    # redistribute atoms such as the ones in the original structure come first 
+    newstr = [tup[0] for tup in sorted([(at, 'original' in at.tags) \
+              for at in newstr.atoms], key = itemgetter(1), 
+              reverse = True)]
+    #for atx, aty in product(newstr[:len(structure.atoms)], 
+    #                        newstr) :
+    #    print distance(atx, aty)
+    for atx in newstr[:len(structure.atoms)] :
+        distances = [99999., 99999., 99999., 99999.]
+        print max(distances)
+        for aty in [at for at in newstr if at != atx] : 
+            if distance(atx, aty) < max(distances) :
+                distances.remove(max(distances))
+                distances.append(distance(atx, aty))
+        print distances
+        break
+
+    return dlist 
 
 def main():
     atlist = [Atom('Si', 0.6779, 0.6779, 0.6779), 
@@ -63,11 +94,12 @@ def main():
               Atom('Si', 4.7429, 4.7429, 4.7429)]
     SiBulk = AtomStruct(atlist, (5.42, 5.42, 5.42, 90.0, 90.0, 90.0))
 
-    x, y = rdf (SiBulk, 60, dist=20.)
-    plt.plot(x, y, 'k-')
-    plt.xlabel('distance $r$ ($\\AA$)')
-    plt.ylabel('$g(r)$')
-    plt.show()
+    rlist = pairof4(SiBulk)
+    #print rlist
+    #plt.plot(x, y, 'k-')
+    #plt.xlabel('distance $r$ ($\\AA$)')
+    #plt.ylabel('$g(r)$')
+    #plt.show()
     print 'Done!'
 
 if __name__ == "__main__":
