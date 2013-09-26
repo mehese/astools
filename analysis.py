@@ -73,13 +73,11 @@ def pairof4(structure, dmax = 10.):
     #    print distance(atx, aty)
     for atx in newstr[:len(structure.atoms)] :
         distances = [99999., 99999., 99999., 99999.]
-        print max(distances)
         for aty in [at for at in newstr if at != atx] : 
             if distance(atx, aty) < max(distances) :
                 distances.remove(max(distances))
                 distances.append(distance(atx, aty))
-        print distances
-        break
+        dlist.extend(distances)
 
     return dlist 
 
@@ -95,11 +93,12 @@ def main():
     SiBulk = AtomStruct(atlist, (5.42, 5.42, 5.42, 90.0, 90.0, 90.0))
 
     rlist = pairof4(SiBulk)
-    #print rlist
+    print rlist
+    plt.hist(rlist)
     #plt.plot(x, y, 'k-')
     #plt.xlabel('distance $r$ ($\\AA$)')
     #plt.ylabel('$g(r)$')
-    #plt.show()
+    plt.show()
     print 'Done!'
 
 if __name__ == "__main__":
