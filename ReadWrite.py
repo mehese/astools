@@ -10,6 +10,13 @@ species2Z = {v:k for k, v in Z2species.items()}
 def ReadStruct(filename, style='crystal', pos=-1):
     """ Reads and input file and returns an AtomStruct
     (str, str) -> AtomStruct
+
+    Available styles:
+
+     crystal     -- CRYSTAL input files
+     crystal_out -- CRYSTAL output files
+     lmp_dump    -- LAMMPS dump file
+
     """
     if style == 'crystal':
         f = [line.split() for line in open(filename, 'r').readlines()]
@@ -70,6 +77,21 @@ def ReadStruct(filename, style='crystal', pos=-1):
             at.Charge(q)
             atoms.append(at)
         cds = (cx, cy, cz, 90., 90., 90.)
+        crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk')
+        return crystal
+    if style == 'castep_inp' :
+        f = open(filename, 'r').read()
+        cx, cy, cz, ang1, ang2, ang3 = tuple(map(float, 
+                                    f.split('LATTICE_ABC')[1].split()[:-1]))
+        cds = (cx, cy, cz, ang1, ang2, ang3)
+        atoms = []
+        for line in f.split('positions_frac' \
+                            )[1][1:-len('%endblock  ')].split('\n'):
+            spec = line.split()[0]
+            x, y, z = tuple(map(float, line.split()[1:]))
+            x, y, z = x*cx, y*cy, z*cz
+            at = Atom(spec, x, y, z)
+            atoms.append(at)
         crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk')
         return crystal
 
@@ -170,8 +192,11 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
 
 def main():
     #str1 = ReadStruct('dump.SiO2tomelt', style='lmp_dump')
-    HfO2 = ReadStruct('HfO2_out', style='crystal_out')
-    PrintStruct(HfO2, 'crystal_inp')
+    #HfO2 = ReadStruct('HfO2_out', style='crystal_out')
+    #PrintStruct(HfO2, 'crystal_inp')
+
+    sio2 = ReadStruct('SiO2Si.cell', style='castep_inp')
+    PrintStruct(sio2, 'crystal_inp')
 
 if __name__ == "__main__" :
     main()
