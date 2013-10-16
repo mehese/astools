@@ -4,6 +4,11 @@
 *.py[co]
 data.*
 dump.*
+fort*
 INPUT*
 *.cell
 *.xsf
+*.castep
+*.LOG
+ERROR
+

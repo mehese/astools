@@ -69,28 +69,31 @@ def pairof4(structure, dmax = 10.):
                     X=(-dmax/structure.coordx, dmax/structure.coordx),
                     Y=(-dmax/structure.coordx, dmax/structure.coordx),
                     Z=(-dmax/structure.coordx, dmax/structure.coordx))
-    
+    #PrintStruct(newstr, 'crystal_inp') 
     # redistribute atoms such as the ones in the original structure come first 
     newstr = [tup[0] for tup in sorted([(at, 'original' in at.tags) \
               for at in newstr.atoms], key = itemgetter(1), 
               reverse = True)]
+
+    # this for only iterates though atoms in the original structure
     for atx in newstr[:len(structure.atoms)] :
         distances = [(99999., ''), (99999., ''), (99999., ''), (99999., ''),  
                     (99999., ''), (99999., ''), (99999., ''), (99999., '')]
+        # this one iterates through all atoms that are not atx 
         for aty in [at for at in newstr if at != atx] : 
-            #print '--', max(distances, key = itemgetter(0))[0]
             max_ = max(distances, key = itemgetter(0))
             if distance(atx, aty) < max_[0] :
                 if ((atx.species, aty.species) == ('Si', 'O') or \
                    (aty.species, atx.species == 'Si', 'O')):
                     tag = 'SiO'
-                    #pass
                 if (atx.species == aty.species == 'Si'):
                     tag = 'SiSi' 
                 if (atx.species == aty.species == 'O'):
                     tag = 'OO'
                 distances.remove(max_)
                 distances.append((distance(atx, aty), tag))
+        distances = sorted(distances, key = itemgetter(0))
+
         # add first 4 neighbours to first 4 neighbours list
         dlist.extend(distances[:4])
         # add next 4 neighbours to next 4 neighbours list
@@ -99,18 +102,10 @@ def pairof4(structure, dmax = 10.):
     return dlist, d2list 
 
 def main():
-    #atlist = [Atom('Si', 0.6779, 0.6779, 0.6779), 
-    #          Atom('Si', 3.3879, 3.3879, 0.6779),
-    #          Atom('Si', 2.0329, 4.7429, 2.0329),
-    #          Atom('Si', 4.7429, 2.0329, 2.0329),
-    #          Atom('Si', 0.6779, 3.3879, 3.3879),
-    #          Atom('Si', 3.3879, 0.6779, 3.3879),
-    #          Atom('Si', 2.0329, 2.0329, 4.7429),
-    #          Atom('Si', 4.7429, 4.7429, 4.7429)]
-    #SiBulk = AtomStruct(atlist, (5.42, 5.42, 5.42, 90.0, 90.0, 90.0))
-    SiO2Si = ReadStruct('INPUT_castep', style='crystal')
+    SiO2Si = ReadStruct('PrintStruct.out', style='crystal')
+    SiO2Si = ReadStruct('SiO2Si.cell', style='castep_inp')
 
-    rlist, _ = pairof4(SiO2Si)
+    rlist, rlist2 = pairof4(SiO2Si, dmax = 6.0)
     pairs1 = [dist[0] for dist in rlist if dist[1] == 'SiO']
     pairs2 = [dist[0] for dist in rlist if dist[1] == 'SiSi']
     pairs3 = [dist[0] for dist in rlist if dist[1] == 'OO']
@@ -120,6 +115,17 @@ def main():
     plt.title('Nearest 4 neighbours histogram SiO2Si, run 1')
     plt.xlabel('pair distance $(\\AA)$')
     plt.legend()
+    plt.figure()
+    pairs1 = [dist[0] for dist in rlist2 if dist[1] == 'SiO']
+    pairs2 = [dist[0] for dist in rlist2 if dist[1] == 'SiSi']
+    pairs3 = [dist[0] for dist in rlist2 if dist[1] == 'OO']
+    sio = plt.hist(pairs1, 100, label='SiO bonds')
+    sisi = plt.hist(pairs2, 100, label='SiSi bonds')
+    oo = plt.hist(pairs3, 100, label = 'OO bonds')
+    plt.title('neighbours 5-8 histogram SiO2Si, run 1')
+    plt.xlabel('pair distance $(\\AA)$')
+    plt.legend()
+
     plt.show()
     print 'Done!'
 
