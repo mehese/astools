@@ -59,6 +59,9 @@ def ReadStruct(filename, style='crystal', pos=-1):
         return crystal
     if style == 'lmp_dump':
         f = open(filename, 'r').read()
+        # Get the number of atoms at given position
+        no_ats = int(f.split('ITEM: BOX BOUNDS')[pos-1].split('ATOMS'
+                 )[-1].split()[0])
         dats=[a for a in f.split('ITEM: BOX BOUNDS')[pos].split('\n')[1:] if \
               a != '']
         cx = map(float, dats[0].split())
@@ -69,7 +72,8 @@ def ReadStruct(filename, style='crystal', pos=-1):
         cz = cz[1] - cz[0]
         #print cx, cy, cz
         atoms = []
-        for line in dats[4:] :
+        # Iterate through the lines with the atoms info
+        for line in dats[4:no_ats+3] :
             a = line.split()
             spec = Z2species[int(float(a[1]))/2]
             x, y, z, q = tuple(map(float, a[2:])) 
@@ -198,7 +202,7 @@ def main():
 
     #sio2 = ReadStruct('SiO2Si.cell', style='castep_inp')
     PrintStruct(str1, 'crystal_inp', name='INPUT_1')
-    #PrintStruct(str2, 'crystal_inp', name='INPUT_2')
+    PrintStruct(str2, 'crystal_inp', name='INPUT_2')
     #PrintStruct(str3, 'crystal_inp', name='INPUT_3')
     print 'All done!'
 
