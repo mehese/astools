@@ -10,13 +10,18 @@ from operations import *
 from analysis import *
 
 def main() :
-    HfO2 = ReadStruct('HfO2_out', style='crystal_out')
-    #HfO2 = slab_hfo2(HfO2, 2, 2, 2.0)
-    #HfO2.normalise()
-    for at in HfO2.atoms:
-        at.tags.append('hfo2')
-    PrintStruct(HfO2, 'castep_inp', name='HfO2.cell')
-    print 'Structure has', len(HfO2.atoms), 'atoms'
+    atlist = [Atom('Si', 0.6779, 0.6779, 0.6779), 
+              Atom('Si', 3.3879, 3.3879, 0.6779),
+              Atom('Si', 2.0329, 4.7429, 2.0329),
+              Atom('Si', 4.7429, 2.0329, 2.0329),
+              Atom('Si', 0.6779, 3.3879, 3.3879),
+              Atom('Si', 3.3879, 0.6779, 3.3879),
+              Atom('Si', 2.0329, 2.0329, 4.7429),
+              Atom('Si', 4.7429, 4.7429, 4.7429)]
+    SiBulk = AtomStruct(atlist, (5.42, 5.42, 5.42, 90.0, 90.0, 90.0))
+
+    PrintStruct(SiBulk, 'crystal_inp', name='INPUT_Si')
+    print 'Structure has', len(SiBulk.atoms), 'atoms'
     print 'Done!'
 
 

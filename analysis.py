@@ -54,10 +54,10 @@ def pairof4(structure, dmax = 10.):
     (AtomStruct, int) -> ((list, list), (list, list))
 
     """
-    class adistance:
-        def __init__(self, r, label) :
-            self.d = r
-            self.label = label
+    #class adistance:
+    #    def __init__(self, r, label) :
+    #        self.d = r
+    #        self.label = label
 
     for atom in structure.atoms:
         atom.tags.append('original')
@@ -102,29 +102,31 @@ def pairof4(structure, dmax = 10.):
     return dlist, d2list 
 
 def main():
-    SiO2Si = ReadStruct('PrintStruct.out', style='crystal')
+    SiO2Si = ReadStruct('INPUT_SiO2Si_relaxed', style='crystal')
     SiO2Si = ReadStruct('SiO2Si.cell', style='castep_inp')
 
     rlist, rlist2 = pairof4(SiO2Si, dmax = 6.0)
     pairs1 = [dist[0] for dist in rlist if dist[1] == 'SiO']
     pairs2 = [dist[0] for dist in rlist if dist[1] == 'SiSi']
     pairs3 = [dist[0] for dist in rlist if dist[1] == 'OO']
-    sio = plt.hist(pairs1, 100, label='SiO bonds')
-    sisi = plt.hist(pairs2, 100, label='SiSi bonds')
-    oo = plt.hist(pairs3, 100, label = 'OO bonds')
-    plt.title('Nearest 4 neighbours histogram SiO2Si, run 1')
-    plt.xlabel('pair distance $(\\AA)$')
-    plt.legend()
-    plt.figure()
-    pairs1 = [dist[0] for dist in rlist2 if dist[1] == 'SiO']
-    pairs2 = [dist[0] for dist in rlist2 if dist[1] == 'SiSi']
-    pairs3 = [dist[0] for dist in rlist2 if dist[1] == 'OO']
-    sio = plt.hist(pairs1, 100, label='SiO bonds')
-    sisi = plt.hist(pairs2, 100, label='SiSi bonds')
-    oo = plt.hist(pairs3, 100, label = 'OO bonds')
-    plt.title('neighbours 5-8 histogram SiO2Si, run 1')
-    plt.xlabel('pair distance $(\\AA)$')
-    plt.legend()
+    sio = plt.hist(pairs1, 100, label='Si-O bonds')
+    sisi = plt.hist(pairs2, 100, label='Si-Si bonds')
+    oo = plt.hist(pairs3, 100, label = 'O-O bonds')
+    plt.title('Nearest 4 neighbours histogram SiO$_2$/Si', fontsize=20)
+    plt.xlabel('Pair distance $(\\AA)$', fontsize=18)
+    plt.legend(prop={'size':25})
+    plt.yticks([])
+    #plt.figure()
+    #pairs1 = [dist[0] for dist in rlist2 if dist[1] == 'SiO']
+    #pairs2 = [dist[0] for dist in rlist2 if dist[1] == 'SiSi']
+    #pairs3 = [dist[0] for dist in rlist2 if dist[1] == 'OO']
+    #sio = plt.hist(pairs1, 100, label='SiO bonds')
+    #sisi = plt.hist(pairs2, 100, label='SiSi bonds')
+    #oo = plt.hist(pairs3, 100, label = 'OO bonds')
+    #plt.title('neighbours 5-8 histogram SiO2Si, run 1')
+    #plt.xlabel('pair distance $(\\AA)$')
+    plt.xticks(fontsize=17)
+    #plt.legend()
 
     plt.show()
     print 'Done!'

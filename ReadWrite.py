@@ -59,7 +59,7 @@ def ReadStruct(filename, style='crystal', pos=-1):
         return crystal
     if style == 'lmp_dump':
         f = open(filename, 'r').read()
-        dats=[a for a in f.split('ITEM: BOX BOUNDS')[-1].split('\n')[1:] if \
+        dats=[a for a in f.split('ITEM: BOX BOUNDS')[pos].split('\n')[1:] if \
               a != '']
         cx = map(float, dats[0].split())
         cx = cx[1] - cx[0]
@@ -191,12 +191,16 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
             f2.close()
 
 def main():
-    #str1 = ReadStruct('dump.SiO2tomelt', style='lmp_dump')
-    #HfO2 = ReadStruct('HfO2_out', style='crystal_out')
-    #PrintStruct(HfO2, 'crystal_inp')
+    str1 = ReadStruct('dump.SiO2tomelt', style='lmp_dump')
+    str2 = ReadStruct('dump.SiO2tomelt', style='lmp_dump', pos=-2)
+    #str3 = ReadStruct('dump.SiO2tomelt', style='lmp_dump', pos=-3)
+    
 
-    sio2 = ReadStruct('SiO2Si.cell', style='castep_inp')
-    PrintStruct(sio2, 'crystal_inp')
+    #sio2 = ReadStruct('SiO2Si.cell', style='castep_inp')
+    PrintStruct(str1, 'crystal_inp', name='INPUT_1')
+    #PrintStruct(str2, 'crystal_inp', name='INPUT_2')
+    #PrintStruct(str3, 'crystal_inp', name='INPUT_3')
+    print 'All done!'
 
 if __name__ == "__main__" :
     main()
