@@ -197,13 +197,15 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
 def main():
     str1 = ReadStruct('dump.SiO2tomelt', style='lmp_dump')
     str2 = ReadStruct('dump.SiO2tomelt', style='lmp_dump', pos=-2)
-    #str3 = ReadStruct('dump.SiO2tomelt', style='lmp_dump', pos=-3)
+    str3 = ReadStruct('dump.SiO2tomelt', style='lmp_dump', pos=-3)
+    str4 = ReadStruct('dump.SiO2tomelt', style='lmp_dump', pos=-4)
     
 
     #sio2 = ReadStruct('SiO2Si.cell', style='castep_inp')
     PrintStruct(str1, 'crystal_inp', name='INPUT_1')
     PrintStruct(str2, 'crystal_inp', name='INPUT_2')
-    #PrintStruct(str3, 'crystal_inp', name='INPUT_3')
+    PrintStruct(str3, 'crystal_inp', name='INPUT_3')
+    PrintStruct(str4, 'crystal_inp', name='INPUT_4')
     print 'All done!'
 
 if __name__ == "__main__" :

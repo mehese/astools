@@ -6,6 +6,24 @@ from operations import *
 from operator import itemgetter, attrgetter
 from itertools import product
 
+
+global coordination_dict 
+coordination_dict = {'H': 1, 'O':2, 'Si': 4, 'Hf':4}
+
+class dist :
+    def __init__(self, species, r) :
+        self.atom_type = species
+        self.length = r
+
+class at_neigbors:
+    """Class that contains the species of an atoms, and a list of dist with
+    its N neighbors, where N is found in coordination_dict
+    """
+    def __init__(self, species):
+        self.atom_type = species
+        self.neighbors = [dist('H', 9e+10)]*coordination_dict[species]
+
+
 def distance(at1, at2):
     """Returns the distance between two atoms
     (Atom, Atom) -> float
@@ -50,7 +68,7 @@ def rdf(structure, nbin, dist=25.):
     return (r, g)
 
 def pairof4(structure, dmax = 10.):
-    """Returns nearest 4 neighbours, and next nearest 4 neighbours
+    """Returns nearest 4 neighbors, and next nearest 4 neighbors
     (AtomStruct, int) -> ((list, list), (list, list))
 
     """
@@ -94,28 +112,96 @@ def pairof4(structure, dmax = 10.):
                 distances.append((distance(atx, aty), tag))
         distances = sorted(distances, key = itemgetter(0))
 
-        # add first 4 neighbours to first 4 neighbours list
+        # add first 4 neighbors to first 4 neighbors list
         dlist.extend(distances[:4])
-        # add next 4 neighbours to next 4 neighbours list
+        # add next 4 neighbors to next 4 neighbors list
         d2list.extend(distances[4:])
 
     return dlist, d2list 
 
-def main():
-    SiO2Si = ReadStruct('INPUT_SiO2Si_relaxed', style='crystal')
-    SiO2Si = ReadStruct('SiO2Si.cell', style='castep_inp')
+def nearest_neighbors(structure, dmax = 10.):
+    """Returns nearest neighbors
+    (AtomStruct, float) -> list of at_neigbors
 
-    rlist, rlist2 = pairof4(SiO2Si, dmax = 6.0)
-    pairs1 = [dist[0] for dist in rlist if dist[1] == 'SiO']
-    pairs2 = [dist[0] for dist in rlist if dist[1] == 'SiSi']
-    pairs3 = [dist[0] for dist in rlist if dist[1] == 'OO']
-    sio = plt.hist(pairs1, 100, label='Si-O bonds')
-    sisi = plt.hist(pairs2, 100, label='Si-Si bonds')
-    oo = plt.hist(pairs3, 100, label = 'O-O bonds')
-    plt.title('Nearest 4 neighbours histogram SiO$_2$/Si', fontsize=20)
-    plt.xlabel('Pair distance $(\\AA)$', fontsize=18)
-    plt.legend(prop={'size':25})
-    plt.yticks([])
+    """
+    
+    for atom in structure.atoms:
+        atom.tags.append('original')
+
+    neighbor_lst = []
+
+    # expand the structure all the way to dmax
+    newstr = expand(structure,
+                    X=(-dmax/structure.coordx, dmax/structure.coordx),
+                    Y=(-dmax/structure.coordx, dmax/structure.coordx),
+                    Z=(-dmax/structure.coordx, dmax/structure.coordx))
+    #PrintStruct(newstr, 'crystal_inp') 
+    # redistribute atoms such as the ones in the original structure come first 
+    newstr = [tup[0] for tup in sorted([(at, 'original' in at.tags) \
+              for at in newstr.atoms], key = itemgetter(1), 
+              reverse = True)]
+
+    # this for only iterates though atoms in the original structure
+    for atx in newstr[:len(structure.atoms)] :
+
+        new_elem = at_neigbors(atx.species)
+        # this one iterates through all atoms that are not atx 
+        for aty in [at for at in newstr if at != atx] : 
+            max_ = max(new_elem.neighbors, key = lambda x: x.length)
+            # If there's an atom at a smaller distance than than the maximum one
+            # in the list of nearest neighbors for atom atx
+            newD = distance(atx, aty)  
+            if newD < max_.length :
+                # replace that element in the list with the new neighbor
+                new_elem.neighbors.remove(max_) 
+                new_elem.neighbors.append(dist(aty.species, newD)) 
+
+        new_elem.neighbors = sorted(new_elem.neighbors, 
+                                    key = lambda x: x.length)
+        
+        neighbor_lst.append(new_elem)
+
+    return neighbor_lst 
+
+
+def main():
+    lO1, lO2, lSi1, lSi2 = [], [], [], []
+    for i in range(-1, -2, -1):
+        print i
+        struct = ReadStruct('dump.SiO2Simelt', style='lmp_dump', pos=i)
+        n_lst = nearest_neighbors(struct, dmax = 6.0)
+        for at1 in n_lst:
+            for at2 in at1.neighbors:
+                if at1.atom_type == 'O' and at2.atom_type == 'O':
+                    lO1.append(at2.length)
+                if at1.atom_type == 'O' and at2.atom_type == 'Si':
+                    lO2.append(at2.length)
+                if at1.atom_type == 'Si' and at2.atom_type == 'Si':
+                    lSi1.append(at2.length)
+                if at1.atom_type == 'Si' and at2.atom_type == 'O':
+                    lSi2.append(at2.length)
+             
+    plt.title('Nearest 2 neighbours, O centred')
+    plt.hist(lO1, 100, label='O-O bonds')
+    plt.hist(lO2, 100, label='O-Si bonds')
+    plt.xlabel('pair distance $(\\AA)$')
+    plt.legend()
+    plt.figure()
+    plt.title('Nearest 4 neighbours, Si centred')
+    plt.hist(lSi1, 100, label='Si-Si bonds')
+    plt.hist(lSi2, 100, label='Si-O bonds')
+    plt.xlabel('pair distance $(\\AA)$')
+    plt.legend()
+    plt.show()
+
+
+    #sio = plt.hist(p1, 100, label='Si-O bonds')
+    #sisi = plt.hist(p2, 100, label='Si-Si bonds')
+    #oo = plt.hist(p3, 100, label = 'O-O bonds')
+    #plt.title('Nearest 4 neighbors histogram SiO$_2$ (40 snapshot)', fontsize=20)
+    #plt.xlabel('Pair distance $(\\AA)$', fontsize=18)
+    #plt.legend(prop={'size':25})
+    #plt.yticks([])
     #plt.figure()
     #pairs1 = [dist[0] for dist in rlist2 if dist[1] == 'SiO']
     #pairs2 = [dist[0] for dist in rlist2 if dist[1] == 'SiSi']
@@ -123,12 +209,9 @@ def main():
     #sio = plt.hist(pairs1, 100, label='SiO bonds')
     #sisi = plt.hist(pairs2, 100, label='SiSi bonds')
     #oo = plt.hist(pairs3, 100, label = 'OO bonds')
-    #plt.title('neighbours 5-8 histogram SiO2Si, run 1')
-    #plt.xlabel('pair distance $(\\AA)$')
-    plt.xticks(fontsize=17)
-    #plt.legend()
+    #plt.title('neighbors 5-8 histogram SiO2Si, run 1')
+    #plt.xticks(fontsize=17)
 
-    plt.show()
     print 'Done!'
 
 if __name__ == "__main__":

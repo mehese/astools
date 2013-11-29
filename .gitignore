@@ -7,6 +7,7 @@ dump.*
 fort*
 INPUT*
 *.cell
+*.pdf
 *.xsf
 *.castep
 *.LOG
