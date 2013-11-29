@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-p
 
 import numpy as np
 import matplotlib.pylab as plt
@@ -23,6 +24,14 @@ class at_neigbors:
         self.atom_type = species
         self.neighbors = [dist('H', 9e+10)]*coordination_dict[species]
 
+    def __str__(self):
+        s = 'Main atom: {} {} \n'.format(self.atom_type, 
+                                         species2Z[self.atom_type])
+        for i, d in zip(range(1, len(self.neighbors)+1), self.neighbors) :
+            s = s+'\t neighbor {:2} : {:2} {:3}  length: {:9.6f} Å \n'.format( \
+            i, d.atom_type, species2Z[d.atom_type], d.length)
+
+        return s
 
 def distance(at1, at2):
     """Returns the distance between two atoms
@@ -163,36 +172,65 @@ def nearest_neighbors(structure, dmax = 10.):
 
     return neighbor_lst 
 
+def neighbor_statistics(structure, dmax = 6., limit=0.20):
+    """Returns nearest neighbors
+    (AtomStruct, float) -> list of at_neigbors
+
+    """
+
+    bond_lengths = np.zeros((100, 100))
+    bond_lengths[8][14] = bond_lengths[14][8] = 1.543
+    bond_lengths[14][14] = 2.34
+    
+    print bond_lengths
+
+    neighbor_lst = nearest_neighbors(structure)
+
+    print 'got the neighbors'
+
+    for at1 in neighbor_lst :
+        #print at1.atom_type, species2Z[at1.atom_type]
+        print at1
+        #for at2 in at1.neighbors:
+        #    print '\t {} {}'.format(at2.atom_type, species2Z[at.atom_type])
+
+    return neighbor_lst 
+
+
+
 
 def main():
     lO1, lO2, lSi1, lSi2 = [], [], [], []
     for i in range(-1, -2, -1):
         print i
         struct = ReadStruct('dump.SiO2Simelt', style='lmp_dump', pos=i)
-        n_lst = nearest_neighbors(struct, dmax = 6.0)
-        for at1 in n_lst:
-            for at2 in at1.neighbors:
-                if at1.atom_type == 'O' and at2.atom_type == 'O':
-                    lO1.append(at2.length)
-                if at1.atom_type == 'O' and at2.atom_type == 'Si':
-                    lO2.append(at2.length)
-                if at1.atom_type == 'Si' and at2.atom_type == 'Si':
-                    lSi1.append(at2.length)
-                if at1.atom_type == 'Si' and at2.atom_type == 'O':
-                    lSi2.append(at2.length)
+        
+        stats = neighbor_statistics(struct)
+
+        #n_lst = nearest_neighbors(struct, dmax = 6.0)
+        #for at1 in n_lst:
+        #    for at2 in at1.neighbors:
+        #        if at1.atom_type == 'O' and at2.atom_type == 'O':
+        #            lO1.append(at2.length)
+        #        if at1.atom_type == 'O' and at2.atom_type == 'Si':
+        #            lO2.append(at2.length)
+        #        if at1.atom_type == 'Si' and at2.atom_type == 'Si':
+        #            lSi1.append(at2.length)
+        #        if at1.atom_type == 'Si' and at2.atom_type == 'O':
+        #            lSi2.append(at2.length)
              
-    plt.title('Nearest 2 neighbours, O centred')
-    plt.hist(lO1, 100, label='O-O bonds')
-    plt.hist(lO2, 100, label='O-Si bonds')
-    plt.xlabel('pair distance $(\\AA)$')
-    plt.legend()
-    plt.figure()
-    plt.title('Nearest 4 neighbours, Si centred')
-    plt.hist(lSi1, 100, label='Si-Si bonds')
-    plt.hist(lSi2, 100, label='Si-O bonds')
-    plt.xlabel('pair distance $(\\AA)$')
-    plt.legend()
-    plt.show()
+    #plt.title('Nearest 2 neighbours, O centred')
+    #plt.hist(lO1, 100, label='O-O bonds')
+    #plt.hist(lO2, 100, label='O-Si bonds')
+    #plt.xlabel('pair distance $(\\AA)$')
+    #plt.legend()
+    #plt.figure()
+    #plt.title('Nearest 4 neighbours, Si centred')
+    #plt.hist(lSi1, 100, label='Si-Si bonds')
+    #plt.hist(lSi2, 100, label='Si-O bonds')
+    #plt.xlabel('pair distance $(\\AA)$')
+    #plt.legend()
+    #plt.show()
 
 
     #sio = plt.hist(p1, 100, label='Si-O bonds')
