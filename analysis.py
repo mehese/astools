@@ -179,8 +179,9 @@ def neighbor_statistics(structure, dmax = 6., limit=0.20):
     """
 
     bond_lengths = np.zeros((100, 100))
-    bond_lengths[8][14] = bond_lengths[14][8] = 1.543
-    bond_lengths[14][14] = 2.34
+    bond_lengths[8][14] = bond_lengths[14][8] = 1.543 # Si-O bonds in Si
+    bond_lengths[14][14] = 2.34 # Si-Si in bulk Si
+    bond_lengths[8][8] = 2.46 # O-O bonds in SiO2
     
     print bond_lengths
 
@@ -189,10 +190,12 @@ def neighbor_statistics(structure, dmax = 6., limit=0.20):
     print 'got the neighbors'
 
     for at1 in neighbor_lst :
-        #print at1.atom_type, species2Z[at1.atom_type]
-        print at1
-        #for at2 in at1.neighbors:
-        #    print '\t {} {}'.format(at2.atom_type, species2Z[at.atom_type])
+        #print at1
+        for at2 in at1.neighbors:
+            #print at2.__class__.__name__
+            if at2.length*(1+limit) > \
+            bond_lengths[species2Z[at1.atom_type]][species2Z[at2.atom_type]]:
+                print 'overcoordinated'  
 
     return neighbor_lst 
 
