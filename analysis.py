@@ -172,9 +172,9 @@ def nearest_neighbors(structure, dmax = 10.):
 
     return neighbor_lst 
 
-def neighbor_statistics(structure, dmax = 6., limit=0.20):
+def neighbor_statistics(structure, dmax = 6., limit=0.20, verbose=True):
     """Returns nearest neighbors
-    (AtomStruct, float) -> list of at_neigbors
+    (AtomStruct, float, float, bool) -> floar, dict
 
     """
 
@@ -183,32 +183,59 @@ def neighbor_statistics(structure, dmax = 6., limit=0.20):
     bond_lengths[14][14] = 2.34 # Si-Si in bulk Si
     bond_lengths[8][8] = 2.46 # O-O bonds in SiO2
     
-    print bond_lengths
 
     neighbor_lst = nearest_neighbors(structure)
 
-    print 'got the neighbors'
+    if verbose:
+        print '  Total number of atoms in structure: {:4}'.format(
+               len(structure.atoms))
 
+    no_ats = len(structure.atoms)
+    # dictionary species: (broken bonds, total expected)
+    at_dict = {x:[0, coordination_dict[x]*len([y for y in structure.atoms if \
+               y.species == x])] for x in set([at.species for at \
+               in structure.atoms])}
+
+    flawed_ats = []
     for at1 in neighbor_lst :
         #print at1
         for at2 in at1.neighbors:
             #print at2.__class__.__name__
-            if at2.length*(1+limit) > \
-            bond_lengths[species2Z[at1.atom_type]][species2Z[at2.atom_type]]:
-                print 'overcoordinated'  
+            if at2.length > \
+            bond_lengths[species2Z[at1.atom_type]][species2Z[at2.atom_type]]\
+            *(1+limit):
+                #print 'overcoordinated'  
+                at_dict[at1.atom_type][0] += 1 
+                flawed_ats.append(at1)
 
-    return neighbor_lst 
+    fraction_flawed = len(set(flawed_ats))/float(len(structure.atoms))
 
+    if verbose:
+        print '  Fraction of atoms with defects: {:10.5f}%'.format(
+               fraction_flawed*100)
 
+    if verbose:
+        for at, lst in at_dict.items():
+            # calculate fraction of broken bonds
+            f = float(lst[0])/lst[1]
+            print '  For {:2} atoms the fraction of broken bonds is {:10.5f}%'\
+                   .format(at, f*100)
 
+    return fraction_flawed, at_dict 
 
 def main():
     lO1, lO2, lSi1, lSi2 = [], [], [], []
-    for i in range(-1, -2, -1):
-        print i
+    j = 1
+    positions = range(-1, -41, -1)
+    for i in positions : 
+        print '\nCalculating structure {:4} out of {:4} ...\n'.format(
+               j, len(positions))
         struct = ReadStruct('dump.SiO2Simelt', style='lmp_dump', pos=i)
         
-        stats = neighbor_statistics(struct)
+        _,_ = neighbor_statistics(struct, verbose=True)
+        
+        j += 1
+        print 60*'-'+'\n'
 
         #n_lst = nearest_neighbors(struct, dmax = 6.0)
         #for at1 in n_lst:
