@@ -73,13 +73,14 @@ def ReadStruct(filename, style='crystal', pos=-1):
         #print cx, cy, cz
         atoms = []
         # Iterate through the lines with the atoms info
-        for line in dats[4:no_ats+3] :
+        for line in dats[4:no_ats+4] :
             a = line.split()
             spec = Z2species[int(float(a[1]))/2]
             x, y, z, q = tuple(map(float, a[2:])) 
             at = Atom(spec, x, y, z)
             at.Charge(q)
             atoms.append(at)
+        #print len(atoms)
         cds = (cx, cy, cz, 90., 90., 90.)
         crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk')
         return crystal

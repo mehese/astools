@@ -72,8 +72,6 @@ def rdf(structure, nbin, dist=25.):
     for i in range(len(r)):
         g[i] = g[i]/(6*r[i]*r[i]*dr + 2*dr*dr*dr)
 
-    # print sorted([(at, distance(i, atom)) for at in structure.atoms], 
-    #         key=itemgetter(1))
     return (r, g)
 
 def pairof4(structure, dmax = 10.):
@@ -81,10 +79,6 @@ def pairof4(structure, dmax = 10.):
     (AtomStruct, int) -> ((list, list), (list, list))
 
     """
-    #class adistance:
-    #    def __init__(self, r, label) :
-    #        self.d = r
-    #        self.label = label
 
     for atom in structure.atoms:
         atom.tags.append('original')
@@ -144,7 +138,7 @@ def nearest_neighbors(structure, dmax = 10.):
                     X=(-dmax/structure.coordx, dmax/structure.coordx),
                     Y=(-dmax/structure.coordx, dmax/structure.coordx),
                     Z=(-dmax/structure.coordx, dmax/structure.coordx))
-    #PrintStruct(newstr, 'crystal_inp') 
+
     # redistribute atoms such as the ones in the original structure come first 
     newstr = [tup[0] for tup in sorted([(at, 'original' in at.tags) \
               for at in newstr.atoms], key = itemgetter(1), 
@@ -200,10 +194,16 @@ def neighbor_statistics(structure, dmax = 6., limit=0.20, verbose=True):
     for at1 in neighbor_lst :
         #print at1
         for at2 in at1.neighbors:
-            #print at2.__class__.__name__
-            if at2.length > \
+            if at1.atom_type == at2.atom_type == 'O':
+                at_dict[at1.atom_type][0] += 1 
+                flawed_ats.append(at1)
+
+            #if at2.length > \
+            #bond_lengths[species2Z[at1.atom_type]][species2Z[at2.atom_type]]\
+            #*(1+limit):
+            if (at2.length > \
             bond_lengths[species2Z[at1.atom_type]][species2Z[at2.atom_type]]\
-            *(1+limit):
+            *(1+limit)) and (not (at1.atom_type == at2.atom_type == 'O')):
                 #print 'overcoordinated'  
                 at_dict[at1.atom_type][0] += 1 
                 flawed_ats.append(at1)
@@ -225,60 +225,41 @@ def neighbor_statistics(structure, dmax = 6., limit=0.20, verbose=True):
 
 def main():
     lO1, lO2, lSi1, lSi2 = [], [], [], []
+    fmin = 0.9
     j = 1
-    positions = range(-1, -41, -1)
+    positions = range(-1, -2001, -50)
+    #positions = range(-1, -2, -50)
     for i in positions : 
-        print '\nCalculating structure {:4} out of {:4} ...\n'.format(
-               j, len(positions))
-        struct = ReadStruct('dump.SiO2Simelt', style='lmp_dump', pos=i)
+        temp_range =  range(3000, 6000, 500)
+        #temp_range =  range(3000, 3001, 500)
+        for k in temp_range:
+            print '\nCalculating structure {:4} out of {:4} ...\n'.format(
+                   j, len(positions)*len(temp_range)*2)
+            struct = ReadStruct(
+                     '/home/eric/lammps-6Dec12/Si/SiO2melt/cmp/dump.SiO2Simelt'+\
+                     str(k)+'t200r5000', style='lmp_dump', pos=i)
         
-        _,_ = neighbor_statistics(struct, verbose=True)
+            f, _ = neighbor_statistics(struct, verbose=True, limit=0.2)
+            if f < fmin:
+                fmin, structmin = f, struct
+                PrintStruct(structmin, 'crystal_inp', name='INPUT_mindefects')
+            j += 1
+            print '\n'+60*'-'+'\n'
+
+            print '\nCalculating structure {:4} out of {:4} ...\n'.format(
+                   j, len(positions)*len(temp_range)*2)
+            struct = ReadStruct(
+                     '/home/eric/lammps-6Dec12/Si/SiO2melt/cmp/dump.SiO2Simelt'+\
+                     str(k)+'t200r10000', style='lmp_dump', pos=i)
         
-        j += 1
-        print 60*'-'+'\n'
+            f, _ = neighbor_statistics(struct, verbose=True, limit=0.2)
+            if f < fmin:
+                fmin, structmin = f, struct
+                PrintStruct(structmin, 'crystal_inp', name='INPUT_mindefects')
+            j += 1
+            print '\n'+60*'-'+'\n'
 
-        #n_lst = nearest_neighbors(struct, dmax = 6.0)
-        #for at1 in n_lst:
-        #    for at2 in at1.neighbors:
-        #        if at1.atom_type == 'O' and at2.atom_type == 'O':
-        #            lO1.append(at2.length)
-        #        if at1.atom_type == 'O' and at2.atom_type == 'Si':
-        #            lO2.append(at2.length)
-        #        if at1.atom_type == 'Si' and at2.atom_type == 'Si':
-        #            lSi1.append(at2.length)
-        #        if at1.atom_type == 'Si' and at2.atom_type == 'O':
-        #            lSi2.append(at2.length)
-             
-    #plt.title('Nearest 2 neighbours, O centred')
-    #plt.hist(lO1, 100, label='O-O bonds')
-    #plt.hist(lO2, 100, label='O-Si bonds')
-    #plt.xlabel('pair distance $(\\AA)$')
-    #plt.legend()
-    #plt.figure()
-    #plt.title('Nearest 4 neighbours, Si centred')
-    #plt.hist(lSi1, 100, label='Si-Si bonds')
-    #plt.hist(lSi2, 100, label='Si-O bonds')
-    #plt.xlabel('pair distance $(\\AA)$')
-    #plt.legend()
-    #plt.show()
-
-
-    #sio = plt.hist(p1, 100, label='Si-O bonds')
-    #sisi = plt.hist(p2, 100, label='Si-Si bonds')
-    #oo = plt.hist(p3, 100, label = 'O-O bonds')
-    #plt.title('Nearest 4 neighbors histogram SiO$_2$ (40 snapshot)', fontsize=20)
-    #plt.xlabel('Pair distance $(\\AA)$', fontsize=18)
-    #plt.legend(prop={'size':25})
-    #plt.yticks([])
-    #plt.figure()
-    #pairs1 = [dist[0] for dist in rlist2 if dist[1] == 'SiO']
-    #pairs2 = [dist[0] for dist in rlist2 if dist[1] == 'SiSi']
-    #pairs3 = [dist[0] for dist in rlist2 if dist[1] == 'OO']
-    #sio = plt.hist(pairs1, 100, label='SiO bonds')
-    #sisi = plt.hist(pairs2, 100, label='SiSi bonds')
-    #oo = plt.hist(pairs3, 100, label = 'OO bonds')
-    #plt.title('neighbors 5-8 histogram SiO2Si, run 1')
-    #plt.xticks(fontsize=17)
+    print 'Min percentage of defects {:10.5f} %'.format(fmin)
 
     print 'Done!'
 
