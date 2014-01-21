@@ -101,7 +101,7 @@ def ReadStruct(filename, style='crystal', pos=-1):
         return crystal
 
     else:
-        print 'Bad File !!!'
+        print 'Filetype not recognized !!!'
         exit()
 
 def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):

@@ -224,42 +224,18 @@ def neighbor_statistics(structure, dmax = 6., limit=0.20, verbose=True):
     return fraction_flawed, at_dict 
 
 def main():
-    lO1, lO2, lSi1, lSi2 = [], [], [], []
     fmin = 0.9
     j = 1
     positions = range(-1, -2001, -50)
     #positions = range(-1, -2, -50)
-    for i in positions : 
-        temp_range =  range(3000, 6000, 500)
-        #temp_range =  range(3000, 3001, 500)
-        for k in temp_range:
-            print '\nCalculating structure {:4} out of {:4} ...\n'.format(
-                   j, len(positions)*len(temp_range)*2)
-            struct = ReadStruct(
-                     '/home/eric/lammps-6Dec12/Si/SiO2melt/cmp/dump.SiO2Simelt'+\
-                     str(k)+'t200r5000', style='lmp_dump', pos=i)
-        
-            f, _ = neighbor_statistics(struct, verbose=True, limit=0.2)
-            if f < fmin:
-                fmin, structmin = f, struct
-                PrintStruct(structmin, 'crystal_inp', name='INPUT_mindefects')
-            j += 1
-            print '\n'+60*'-'+'\n'
+    struct = ReadStruct('INPUT_Si', 
+                        style='crystal')
 
-            print '\nCalculating structure {:4} out of {:4} ...\n'.format(
-                   j, len(positions)*len(temp_range)*2)
-            struct = ReadStruct(
-                     '/home/eric/lammps-6Dec12/Si/SiO2melt/cmp/dump.SiO2Simelt'+\
-                     str(k)+'t200r10000', style='lmp_dump', pos=i)
-        
-            f, _ = neighbor_statistics(struct, verbose=True, limit=0.2)
-            if f < fmin:
-                fmin, structmin = f, struct
-                PrintStruct(structmin, 'crystal_inp', name='INPUT_mindefects')
-            j += 1
-            print '\n'+60*'-'+'\n'
+    struct = repeat(struct, 3, 3 ,3)
 
-    print 'Min percentage of defects {:10.5f} %'.format(fmin)
+    PrintStruct(struct, 'crystal_inp')
+
+    f, _ = neighbor_statistics(struct, verbose=True, limit=0.2)
 
     print 'Done!'
 
