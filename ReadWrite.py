@@ -4,7 +4,7 @@ from structures import *
 
 # Dictionary that changes the Z to a string defining the atom species
 # You should probably try completing it
-Z2species = {1:'H', 2:'He', 8:'O', 14:'Si', 72:'Hf'}
+Z2species = {1:'H', 2:'He', 4:'Be', 6:'C', 8:'O', 12:'Mg', 14:'Si', 72:'Hf'}
 species2Z = {v:k for k, v in Z2species.items()}
 
 def ReadStruct(filename, style='crystal', pos=-1):
