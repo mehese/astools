@@ -22,13 +22,17 @@ def repeat(structure, ex, ey, ez) :
     ats = []
     for xx, yy, zz in its.product(range(ex), range(ey), 
                                   range(ez)):
-        # print xx, yy, zz
         for at in structure.atoms:
             at_ = Atom(at.species, at.x + xx*structure.coordx, 
                        at.y + yy*structure.coordy, 
                        at.z + zz*structure.coordz)
             at_.tags = list(at.tags)
-            at_.Charge(at.charge)
+            # try to give the atoms the same charge
+            try :
+                at_.Charge(at.charge)
+            except AttributeError:
+                at_.Charge(0.0)
+                at.Charge(0.0)
             ats.append(at_)
 
     newstruct = AtomStruct(ats, (coord_x, coord_y, coord_z, structure.alpha,

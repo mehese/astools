@@ -72,8 +72,6 @@ def rdf(structure, nbin, dist=25.):
     for i in range(len(r)):
         g[i] = g[i]/(6*r[i]*r[i]*dr + 2*dr*dr*dr)
 
-    # print sorted([(at, distance(i, atom)) for at in structure.atoms], 
-    #         key=itemgetter(1))
     return (r, g)
 
 def pairof4(structure, dmax = 10.):
@@ -81,10 +79,6 @@ def pairof4(structure, dmax = 10.):
     (AtomStruct, int) -> ((list, list), (list, list))
 
     """
-    #class adistance:
-    #    def __init__(self, r, label) :
-    #        self.d = r
-    #        self.label = label
 
     for atom in structure.atoms:
         atom.tags.append('original')
@@ -144,7 +138,7 @@ def nearest_neighbors(structure, dmax = 10.):
                     X=(-dmax/structure.coordx, dmax/structure.coordx),
                     Y=(-dmax/structure.coordx, dmax/structure.coordx),
                     Z=(-dmax/structure.coordx, dmax/structure.coordx))
-    #PrintStruct(newstr, 'crystal_inp') 
+
     # redistribute atoms such as the ones in the original structure come first 
     newstr = [tup[0] for tup in sorted([(at, 'original' in at.tags) \
               for at in newstr.atoms], key = itemgetter(1), 
@@ -172,9 +166,9 @@ def nearest_neighbors(structure, dmax = 10.):
 
     return neighbor_lst 
 
-def neighbor_statistics(structure, dmax = 6., limit=0.20):
+def neighbor_statistics(structure, dmax = 6., limit=0.20, verbose=True):
     """Returns nearest neighbors
-    (AtomStruct, float) -> list of at_neigbors
+    (AtomStruct, float, float, bool) -> floar, dict
 
     """
 
@@ -183,75 +177,65 @@ def neighbor_statistics(structure, dmax = 6., limit=0.20):
     bond_lengths[14][14] = 2.34 # Si-Si in bulk Si
     bond_lengths[8][8] = 2.46 # O-O bonds in SiO2
     
-    print bond_lengths
 
     neighbor_lst = nearest_neighbors(structure)
 
-    print 'got the neighbors'
+    if verbose:
+        print '  Total number of atoms in structure: {:4}'.format(
+               len(structure.atoms))
 
+    no_ats = len(structure.atoms)
+    # dictionary species: (broken bonds, total expected)
+    at_dict = {x:[0, coordination_dict[x]*len([y for y in structure.atoms if \
+               y.species == x])] for x in set([at.species for at \
+               in structure.atoms])}
+
+    flawed_ats = []
     for at1 in neighbor_lst :
         #print at1
         for at2 in at1.neighbors:
-            #print at2.__class__.__name__
-            if at2.length*(1+limit) > \
-            bond_lengths[species2Z[at1.atom_type]][species2Z[at2.atom_type]]:
-                print 'overcoordinated'  
+            if at1.atom_type == at2.atom_type == 'O':
+                at_dict[at1.atom_type][0] += 1 
+                flawed_ats.append(at1)
 
-    return neighbor_lst 
+            #if at2.length > \
+            #bond_lengths[species2Z[at1.atom_type]][species2Z[at2.atom_type]]\
+            #*(1+limit):
+            if (at2.length > \
+            bond_lengths[species2Z[at1.atom_type]][species2Z[at2.atom_type]]\
+            *(1+limit)) and (not (at1.atom_type == at2.atom_type == 'O')):
+                #print 'overcoordinated'  
+                at_dict[at1.atom_type][0] += 1 
+                flawed_ats.append(at1)
 
+    fraction_flawed = len(set(flawed_ats))/float(len(structure.atoms))
 
+    if verbose:
+        print '  Fraction of atoms with defects: {:10.5f}%'.format(
+               fraction_flawed*100)
 
+    if verbose:
+        for at, lst in at_dict.items():
+            # calculate fraction of broken bonds
+            f = float(lst[0])/lst[1]
+            print '  For {:2} atoms the fraction of broken bonds is {:10.5f}%'\
+                   .format(at, f*100)
+
+    return fraction_flawed, at_dict 
 
 def main():
-    lO1, lO2, lSi1, lSi2 = [], [], [], []
-    for i in range(-1, -2, -1):
-        print i
-        struct = ReadStruct('dump.SiO2Simelt', style='lmp_dump', pos=i)
-        
-        stats = neighbor_statistics(struct)
+    fmin = 0.9
+    j = 1
+    positions = range(-1, -2001, -50)
+    #positions = range(-1, -2, -50)
+    struct = ReadStruct('INPUT_Si', 
+                        style='crystal')
 
-        #n_lst = nearest_neighbors(struct, dmax = 6.0)
-        #for at1 in n_lst:
-        #    for at2 in at1.neighbors:
-        #        if at1.atom_type == 'O' and at2.atom_type == 'O':
-        #            lO1.append(at2.length)
-        #        if at1.atom_type == 'O' and at2.atom_type == 'Si':
-        #            lO2.append(at2.length)
-        #        if at1.atom_type == 'Si' and at2.atom_type == 'Si':
-        #            lSi1.append(at2.length)
-        #        if at1.atom_type == 'Si' and at2.atom_type == 'O':
-        #            lSi2.append(at2.length)
-             
-    #plt.title('Nearest 2 neighbours, O centred')
-    #plt.hist(lO1, 100, label='O-O bonds')
-    #plt.hist(lO2, 100, label='O-Si bonds')
-    #plt.xlabel('pair distance $(\\AA)$')
-    #plt.legend()
-    #plt.figure()
-    #plt.title('Nearest 4 neighbours, Si centred')
-    #plt.hist(lSi1, 100, label='Si-Si bonds')
-    #plt.hist(lSi2, 100, label='Si-O bonds')
-    #plt.xlabel('pair distance $(\\AA)$')
-    #plt.legend()
-    #plt.show()
+    struct = repeat(struct, 3, 3 ,3)
 
+    PrintStruct(struct, 'crystal_inp')
 
-    #sio = plt.hist(p1, 100, label='Si-O bonds')
-    #sisi = plt.hist(p2, 100, label='Si-Si bonds')
-    #oo = plt.hist(p3, 100, label = 'O-O bonds')
-    #plt.title('Nearest 4 neighbors histogram SiO$_2$ (40 snapshot)', fontsize=20)
-    #plt.xlabel('Pair distance $(\\AA)$', fontsize=18)
-    #plt.legend(prop={'size':25})
-    #plt.yticks([])
-    #plt.figure()
-    #pairs1 = [dist[0] for dist in rlist2 if dist[1] == 'SiO']
-    #pairs2 = [dist[0] for dist in rlist2 if dist[1] == 'SiSi']
-    #pairs3 = [dist[0] for dist in rlist2 if dist[1] == 'OO']
-    #sio = plt.hist(pairs1, 100, label='SiO bonds')
-    #sisi = plt.hist(pairs2, 100, label='SiSi bonds')
-    #oo = plt.hist(pairs3, 100, label = 'OO bonds')
-    #plt.title('neighbors 5-8 histogram SiO2Si, run 1')
-    #plt.xticks(fontsize=17)
+    f, _ = neighbor_statistics(struct, verbose=True, limit=0.2)
 
     print 'Done!'
 

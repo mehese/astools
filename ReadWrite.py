@@ -16,6 +16,7 @@ def ReadStruct(filename, style='crystal', pos=-1):
      crystal     -- CRYSTAL input files
      crystal_out -- CRYSTAL output files
      lmp_dump    -- LAMMPS dump file
+     castep      -- CASTEP .castep file
 
     """
     if style == 'crystal':
@@ -73,13 +74,14 @@ def ReadStruct(filename, style='crystal', pos=-1):
         #print cx, cy, cz
         atoms = []
         # Iterate through the lines with the atoms info
-        for line in dats[4:no_ats+3] :
+        for line in dats[4:no_ats+4] :
             a = line.split()
             spec = Z2species[int(float(a[1]))/2]
             x, y, z, q = tuple(map(float, a[2:])) 
             at = Atom(spec, x, y, z)
             at.Charge(q)
             atoms.append(at)
+        #print len(atoms)
         cds = (cx, cy, cz, 90., 90., 90.)
         crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk')
         return crystal
@@ -98,14 +100,50 @@ def ReadStruct(filename, style='crystal', pos=-1):
             atoms.append(at)
         crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk')
         return crystal
+    if style == 'castep':
+        f = open(filename, 'r').read()
+        no_ats = int(f.split('Total number of ions in cell =')[1][:5])
+
+        dats = f.split('Cell Contents')[pos].split('x'+58*'-'+'x\n'
+               )[1].split(60*'x')[0].split('\n')[:-1]
+
+        coords = map(lambda p: tuple(p.split()),
+                     f.split('Lattice parameters(A)')[1].split('\n')[1:4])
+
+        cx, alpha = float(coords[0][2]), float(coords[0][-1])
+        cy, beta  = float(coords[1][2]), float(coords[1][-1])
+        cz, gamma = float(coords[2][2]), float(coords[2][-1])
+        #print coords
+        cds = (cx, cy, cz, alpha, beta, gamma)
+
+        atoms = []
+        for line in dats:
+            a = line.split()[1:-1]
+            spec = a[0]
+            x = float(a[2])*cx
+            y = float(a[3])*cy
+            z = float(a[4])*cz
+            at = Atom(spec, x, y, z)
+            atoms.append(at)
+
+        crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk')
+
+        return crystal
 
     else:
-        print 'Bad File !!!'
+        print 'Filetype not recognized !!!'
         exit()
 
 def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
     """Prints an AtomStruct to an ASCII file of desired format
     (AtomStruct, str) -> None
+    
+    filetype must be one of the following strings:
+
+    crystal_inp  -- CRYSTAL input file
+    lmp_data     -- LAMMPS data file with charges
+    castep_inp   -- CASTEP .cell file
+
     """
     if filetype == 'lmp_data':
         f2 = open(name, 'w')
