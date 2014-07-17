@@ -1,14 +1,12 @@
 Tools to use in manipulating structures
 
-TO DO NOW:
+ReadWrite.py 
+	structures -- defines the Atom and AtomStruct classes
+	ReadStruct -- takes an output file or input file and returns and AtomStruct
+	operations -- functions that modify a given AtomStruct
+	analysis   -- functions that give some characteristics for the AtomStruct
+                  like the RDF and such
 
-	- remember to rescale the x, y dimensions of the SiO2 cell so it fits
-	  perfectly the Si cell
+TO DO:
 
-TO DO AFTER NOW (still ASAP, new .py file) :
-
-	- create simple rdf class
-	- calculate & plot pair distribution function
-		rdf(StructAts, radius, **pair labels)
-		return structure rdf
-	- velocity autocorrelation function
+	- maybe a more detailed neighbor analysis routine

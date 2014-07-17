@@ -13,6 +13,9 @@ class Atom:
         self.charge = val
     def Addtag(tag):
         self.tags.append(tag)
+    def __str__(self):
+        return '{:2} {:10.5f} {:10.5f} {:10.5f}'.format(self.species,
+                self.x, self.y, self.z)
 
 class AtomStruct:
     """ Defines a structure of atoms
@@ -51,6 +54,10 @@ class AtomStruct:
     
     def charge(self):
         return sum([atom.charge for atom in self.atoms])
+    
+    def ClearTags(self):
+        for at in self.atoms:
+            at.tags = []
 
     def normalise(self):
         """ Removes negative coordinates, all coordinates must fit box
@@ -63,4 +70,6 @@ class AtomStruct:
                 at.y = self.coordy + at.y
             if at.z < 0. :
                 at.z = self.coordz + at.z
+    def __len__(self):
+        return len(self.atoms)
 

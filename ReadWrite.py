@@ -4,7 +4,7 @@ from structures import *
 
 # Dictionary that changes the Z to a string defining the atom species
 # You should probably try completing it
-Z2species = {1:'H', 2:'He', 8:'O', 14:'Si', 72:'Hf'}
+Z2species = {0: 'X', 1:'H', 2:'He', 8:'O', 14:'Si', 15:'P', 72:'Hf', 89: 'Hf'}
 species2Z = {v:k for k, v in Z2species.items()}
 
 def ReadStruct(filename, style='crystal', pos=-1):
@@ -231,6 +231,8 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
                 f2.write('{}   {}_00PBE_OP.recpot\n'.format(s, s))
             f2.write('%endblock species_pot\n')
             f2.close()
+    else :
+        print '!!! ERROR PrintStruct: Unrecognised filetype !!!'
 
 def main():
     str1 = ReadStruct('dump.SiO2tomelt', style='lmp_dump')
