@@ -12,6 +12,10 @@ from ReadWrite import PrintStruct, ReadStruct
 global coordination_dict 
 coordination_dict = {'H': 1, 'O':2, 'Si': 4, 'Hf':4}
 
+# dictionary containing the atomic mass units of elemets, taken from Wolfram
+# Alpha
+mass_dict = {'H':1.00749, 'O':15.9994, 'Si':28.0855, 'Hf':178.49}
+
 class dist :
     def __init__(self, species, r) :
         self.atom_type = species
@@ -79,7 +83,90 @@ def rdf(structure, nbin, dist=25.):
     # normalising with respect to the radius
 
     for i in range(len(r)):
-        g[i] = g[i]/(6*r[i]*r[i]*dr + 2*dr*dr*dr)
+        g[i] = g[i]/(6*r[i]*r[i]*dr + 2*dr*dr*dr)/len(structure)
+
+    return (r, g)
+
+def rdf_triclinic(structure, nbin, dist=25., verbose=False):
+    """Returns the pair distribution function for a system in nbin bins
+    (AtomStruct, int, float) -> (list, list)
+    Works for triclinic cells
+    """
+
+    at_set = set([x.species for x in structure.atoms])
+    pair_set = list(set(['-'.join(sorted([x, y])) for x in at_set for y in \
+               at_set]))
+
+    if verbose:
+        print 'Cell parameters:\na     = {:7.4f}    b = {:7.4f}     c =\
+        {:7.4f}'.format(structure.coordx, structure.coordy, structure.coordz)
+        print 'alpha = {:7.4f} beta = {:7.4f} gamma =\
+        {:5.3f}'.format(structure.alpha, structure.beta, structure.gamma)
+    for atom in structure.atoms:
+        atom.tags.append('original')
+    dr = dist/float(2*nbin)
+    r = [(i*dist/nbin + dist/(2*nbin)) for i in range(nbin)]
+    g = []
+    for i in range(len(pair_set)):
+        g.append([0]*len(r))
+    i = structure.atoms[0]
+    max_xyz = triclinic2xyz(Atom('X', 1., 1., 1.), structure)
+    if verbose:
+        print 'Direction vectors...'
+        print xyz2triclinic(Atom('X', dist, 0., 0.), structure)
+        print xyz2triclinic(Atom('X', 0., dist, 0.), structure)
+        print xyz2triclinic(Atom('X', 0., 0., dist), structure)
+    xx, yy, zz = tuple(map(lambda k: np.modf(dist/k)[1]+3,max_xyz))
+    if verbose:
+        print 'Expansion coef:\n{:10.6f} {:10.6f}\n{:10.6f} {:10.6f}\n{:10.6f} {:10.6f}'.format(-xx, xx, -yy, yy, -zz, zz)
+
+    newstr = expand2(structure,
+                    X=(-xx, xx),
+                    Y=(-yy, yy),
+                    Z=(-zz, zz))
+    newstr = [tup[0] for tup in sorted([(at, 'original' in at.tags) \
+              for at in newstr.atoms], key = itemgetter(1), 
+              reverse = True)]
+    
+    # counting the number of atoms at certain distance intervals
+
+    #for d in [distance(at1, at2) for at1 in newstr[:len(structure.atoms)] \
+    #          for at2 in newstr if 1e-5 < distance(at1, at2) < dist]:
+    #    for i in range(len(r)):
+    #        if (r[i] - dr) <= d < (r[i] + dr):
+    #            g[i] += 1.
+    if verbose:
+        print 'Starting to check pairs...'
+    for i in range(len(pair_set)):
+        o1, o2 = tuple(pair_set[i].split('-'))
+        #l1 = [at for at in newstr[:len(structure.atoms)] if at.species == o1]
+        #l2 = [at for at in newstr[] if at.species == o2]
+        for d in [distance(at1, at2) \
+                  for at1 in newstr[:len(structure.atoms)] \
+                  if at1.species == o1 \
+                  for at2 in newstr if (1e-5 < distance(at1, at2) < dist and \
+                  at2.species == o2)]:
+            for j in range(len(r)):
+                if (r[j] - dr) <= d < (r[j] + dr):
+                    g[i][j] += 1.
+                    if o1 != o2 :
+                        g[i][j] += 1
+    if verbose:
+        print 'Pair checking done, scaling final function'
+
+    # normalising with respect to the radius
+
+    # normalising with respect to the radius
+
+    #for i in range(len(r)):
+    #    g[i] = g[i]/(6*r[i]*r[i]*dr + 2*dr*dr*dr)/len(structure)
+    for i in range(len(g)):
+        for j in range(len(r)):
+            g[i][j] = g[i][j]/(6*r[j]*r[j]*dr + 2*dr*dr*dr)/len(structure)
+        g[i].append(pair_set[i])
+
+    if verbose:
+        print 'RDF done!'
 
     return (r, g)
 
@@ -132,7 +219,7 @@ def rdf2(structure, nbin, dist=25.):
 
     for i in range(len(g)):
         for j in range(len(r)):
-            g[i][j] = g[i][j]/(6*r[j]*r[j]*dr + 2*dr*dr*dr)
+            g[i][j] = g[i][j]/(6*r[j]*r[j]*dr + 2*dr*dr*dr)/len(structure)
         g[i].append(pair_set[i])
 
     return (r, g)
@@ -243,7 +330,7 @@ def get_neighbours(at_main, structure, dmax=10., verbose=False):
             d = distance(atx, newstr[i])
             voisins.append(neighbour(newstr[i], d))
             # One less neighbour to worry about
-        i = i+1
+        i = np.random.randint(len(newstr)) 
 
     if verbose:
         print 'Initial list:', [str(l) for l in voisins]
@@ -390,6 +477,51 @@ def neighbor_statistics(structure, dmax = 6., limit=0.20, verbose=True):
                    .format(at, f*100)
 
     return fraction_flawed, at_dict 
+
+def vertical_density_profile(struct, deltaz, no_points=200, full=False):
+    """ Takes in a structure, returns a set of points along the z axis, and the
+    corresponding densities
+    (AtomStruct, float) -> (float, float)
+    density is defined as (mass of atoms with z-deltaz < at.z < z+deltaz) /
+    2*deltaz*struct.coordx*struct.coordy
+    """
+    # go half a structure up, and half a structure up so  
+    z = np.linspace(-0.5*struct.coordz, 1.5*struct.coordz, 2*no_points)
+    rho = np.zeros(2*no_points)
+
+    work_struct = repeat(struct, 1, 1, 3)
+    for at in work_struct.atoms:
+        at.z = at.z - struct.coordz
+
+    for i in range(len(z)):
+        for at in work_struct.atoms:
+            if z[i] - deltaz < at.z < z[i] + deltaz:
+                rho[i] = rho[i] + mass_dict[at.species]
+
+    # works for orthorhombic cells only, 1.66 -- conversion to g/cm^3 
+    volume = 2*deltaz*struct.coordx*struct.coordy/1.66
+
+    # full returns the whole array, full=False only the z=0, z=zmax one
+    if full:
+        return z, rho/volume
+    else:
+        return (z[int(0.5*no_points): int(1.5*no_points)], 
+                rho[int(0.5*no_points): int(1.5*no_points)]/volume)
+
+    #z, rho = np.linspace(0., struct.coordz, no_points), np.zeros(no_points)
+    #
+    #work_struct = repeat(struct, 1, 1, 3)
+    #for at in work_struct.atoms:
+    #    at.z = at.z - struct.coordz
+
+    #for i in range(len(z)):
+    #    for at in work_struct.atoms:
+    #        if z[i] - deltaz < at.z < z[i] + deltaz:
+    #            rho[i] = rho[i] + mass_dict[at.species]
+
+    ## works for orthorhombic cells only 
+    #volume = 2*deltaz*struct.coordx*struct.coordy 
+    #return z, 1.66*rho/volume
 
 def main():
     fmin = 0.9
