@@ -1,12 +1,13 @@
 Tools to use in manipulating structures
 
-ReadWrite.py 
 	structures -- defines the Atom and AtomStruct classes
-	ReadStruct -- takes an output file or input file and returns and AtomStruct
+	ReadWrite  -- takes an output file or input file and returns and AtomStruct
 	operations -- functions that modify a given AtomStruct
-	analysis   -- functions that give some characteristics for the AtomStruct
+	analysis   -- functions that give some characteristics AtomStruct
                   like the RDF and such
+
+Use with python2.7
 
 TO DO:
 
-	- maybe a more detailed neighbor analysis routine
+	- clean up the codebase
