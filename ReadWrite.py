@@ -4,7 +4,7 @@ from structures import *
 
 # Dictionary that changes the Z to a string defining the atom species
 # You should probably try completing it
-Z2species = {1:'H', 2:'He', 8:'O', 14:'Si', 72:'Hf'}
+Z2species = {0: 'X', 1:'H', 2:'He', 8:'O', 13: 'Al', 14:'Si', 15:'P', 72:'Hf', 89: 'Hf'}
 species2Z = {v:k for k, v in Z2species.items()}
 
 def ReadStruct(filename, style='crystal', pos=-1):
@@ -30,20 +30,23 @@ def ReadStruct(filename, style='crystal', pos=-1):
             # Going through the atom list
             for line in f[6:int(f[5][0])+6] :
                 spec = Z2species[int(line[0][-2:])] 
-                x = float(line[1])*cds[0] # Atom object stores 
-                y = float(line[2])*cds[1] # absolute distances, not
-                z = float(line[3])*cds[2] # fractional coordinates
+                x = float(line[1]) # Atom object stores 
+                y = float(line[2]) # absolute distances, not
+                z = float(line[3]) # fractional coordinates
                 at = Atom(spec, x, y, z)
                 #appending the atom object to the atom list
                 atoms.append(at)
-            crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk')
+            # frac = True tells atoms struct that it should change the
+            # coordinates using the triclinic transformation
+            crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk',
+                                 frac=True)
             return crystal
         else:
             print 'Bad File !!!'
             exit()
     if style == 'crystal_out':
         f = open(filename, 'r').read()
-        print 'opened', filename
+        #print 'opened', filename
         c = f.split('CARTESIAN COORDINATES')[-2].split('PRIMITIVE CELL')[-1]
         cds = tuple(map(float, c.split('\n')[2].split()))
         c = f.split('CARTESIAN COORDINATES')[-1].split('\n')[4:50]
@@ -95,10 +98,11 @@ def ReadStruct(filename, style='crystal', pos=-1):
                             )[1][1:-len('%endblock  ')].split('\n'):
             spec = line.split()[0]
             x, y, z = tuple(map(float, line.split()[1:]))
-            x, y, z = x*cx, y*cy, z*cz
+            #x, y, z = x*cx, y*cy, z*cz
             at = Atom(spec, x, y, z)
             atoms.append(at)
-        crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk')
+        crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk',
+                             frac=True)
         return crystal
     if style == 'castep':
         f = open(filename, 'r').read()
@@ -108,7 +112,7 @@ def ReadStruct(filename, style='crystal', pos=-1):
                )[1].split(60*'x')[0].split('\n')[:-1]
 
         coords = map(lambda p: tuple(p.split()),
-                     f.split('Lattice parameters(A)')[1].split('\n')[1:4])
+                     f.split('Lattice parameters(A)')[pos].split('\n')[1:4])
 
         cx, alpha = float(coords[0][2]), float(coords[0][-1])
         cy, beta  = float(coords[1][2]), float(coords[1][-1])
@@ -120,21 +124,25 @@ def ReadStruct(filename, style='crystal', pos=-1):
         for line in dats:
             a = line.split()[1:-1]
             spec = a[0]
-            x = float(a[2])*cx
-            y = float(a[3])*cy
-            z = float(a[4])*cz
+            #x = float(a[2])*cx
+            #y = float(a[3])*cy
+            #z = float(a[4])*cz
+            x = float(a[2])
+            y = float(a[3])
+            z = float(a[4])
             at = Atom(spec, x, y, z)
             atoms.append(at)
 
-        crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk')
-
+        crystal = AtomStruct(atoms, cds, coordstyle='Angles', pb='bulk',
+                             frac=True)
         return crystal
 
     else:
         print 'Filetype not recognized !!!'
         exit()
 
-def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
+def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False,
+                freeze_tagged = False, mark_frozen = False):
     """Prints an AtomStruct to an ASCII file of desired format
     (AtomStruct, str) -> None
     
@@ -143,6 +151,12 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
     crystal_inp  -- CRYSTAL input file
     lmp_data     -- LAMMPS data file with charges
     castep_inp   -- CASTEP .cell file
+
+    freeze_tagged -- freezes the atoms that contain the 'frozen' label in their
+    Atom.tags list in a castep .cell file
+
+    mark_tagged -- changes the atomic number of the atoms to phosphorous in a
+    CRYSTAL input file for easy checking in xcrysden
 
     """
     if filetype == 'lmp_data':
@@ -183,14 +197,20 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
                      structure.alpha, structure.beta, structure.gamma))
             f2.write('{}\n'.format(len(structure.atoms)))
             for atom in structure.atoms :
-                x_ = atom.x / structure.coordx # CRYSTAL input files require 
-                y_ = atom.y / structure.coordy # fractional coordinates
-                z_ = atom.z / structure.coordz #
-                f2.write('{:3} {: 15.9f} {: 15.9f} {: 15.9f}\n'.format(
-                         species2Z[atom.species], x_, y_, z_))
+                #x_ = atom.x / structure.coordx # CRYSTAL input files require 
+                #y_ = atom.y / structure.coordy # fractional coordinates
+                #z_ = atom.z / structure.coordz #
+                x_, y_, z_ = xyz2triclinic(atom, structure)
+                if mark_frozen and 'frozen' in atom.tags:
+                    f2.write('{:3} {: 15.9f} {: 15.9f} {: 15.9f}\n'.format(
+                             15, x_, y_, z_))
+                else :
+                    f2.write('{:3} {: 15.9f} {: 15.9f} {: 15.9f}\n'.format(
+                             species2Z[atom.species], x_, y_, z_))
             f2.write('ENDGEOM\nSTOP\n')
             f2.close()
         if structure.periodicity == 'slab':
+            # !!! WARNING -- NOT TESTED !!!
             f2 = open(name, 'w')
             f2.write('Created with astools\nSLAB\n1\n')
             f2.write('{:-g} {:-g} {:-3.5f}\n'.format(
@@ -205,7 +225,7 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
                          species2Z[atom.species], x_, y_, z_))
             f2.write('ENDGEOM\nSTOP\n')
             f2.close()
-    elif filetype == 'castep_inp':
+    elif filetype == 'castep_inp' and freeze_tagged == False:
         if structure.periodicity == 'bulk':
             f2 = open(name, 'w')
             types = set([nm.species for nm in structure.atoms])
@@ -219,9 +239,11 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
             f2.write('%endblock LATTICE_ABC\n\n')
             f2.write('%block positions_frac\n')
             for at in structure.atoms:
+                x_, y_, z_ = xyz2triclinic(at, structure)
                 f2.write('{}    {:f}    {:f}    {:f}\n'.format(
-                at.species.rjust(2), at.x/structure.coordx, 
-                at.y/structure.coordy, at.z/structure.coordz))
+                at.species.rjust(2), x_, y_, z_))
+                #at.species.rjust(2), at.x/structure.coordx, 
+                #at.y/structure.coordy, at.z/structure.coordz))
             f2.write('%endblock positions_frac\n')
             f2.write('\nfix_all_cell : true\n\n')
             f2.write('kpoints_mp_grid 4 4 2\n\n')
@@ -231,6 +253,67 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False):
                 f2.write('{}   {}_00PBE_OP.recpot\n'.format(s, s))
             f2.write('%endblock species_pot\n')
             f2.close()
+
+    elif filetype == 'castep_inp' and freeze_tagged == True:
+        # prerequisite for writing the block ionic_constraints
+        structure.atoms = sorted(structure.atoms, key=lambda x: x.species)
+        if structure.periodicity == 'bulk':
+            f2 = open(name, 'w')
+            types = set([nm.species for nm in structure.atoms])
+            f2.write('%block LATTICE_ABC\n')
+            f2.write('{:f} {:f} {:f}\n'.format(structure.coordx,
+                                               structure.coordy,
+                                               structure.coordz))
+            f2.write('{:f} {:f} {:f}\n'.format(structure.alpha,
+                                               structure.beta,
+                                               structure.gamma))
+            f2.write('%endblock LATTICE_ABC\n\n')
+            f2.write('%block positions_frac\n')
+            for at in structure.atoms:
+                x_, y_, z_ = xyz2triclinic(at, structure)
+                f2.write('{}    {:f}    {:f}    {:f}\n'.format(
+                at.species.rjust(2), x_, y_, z_))
+                #f2.write('{}    {:f}    {:f}    {:f}\n'.format(
+                #at.species.rjust(2), at.x/structure.coordx, 
+                #at.y/structure.coordy, at.z/structure.coordz))
+            f2.write('%endblock positions_frac\n')
+            # Add the ionic constrants, cf
+            # http://www.tcm.phy.cam.ac.uk/castep/documentation/WebHelp/html/keywords/k_ionic_constraints_castep.htm
+            f2.write('\n%block IONIC_CONSTRAINTS\n')
+            # Doing all that retarded shit CASTEP needs to recognise
+            k = 1
+            j = 1
+            current_sp = structure.atoms[0].species
+            for at in structure.atoms:
+                if at.species != current_sp :
+                    j = 1
+                    current_sp = at.species
+                if 'frozen' in at.tags:
+                    # first coordinate
+                    f2.write('{:5} {:3} {:5}   1.00 0.00 0.00\n'.format(k, 
+                             at.species, j))   
+                    k += 1                     
+                    # second coordinate        
+                    f2.write('{:5} {:3} {:5}   0.00 1.00 0.00\n'.format(k, 
+                             at.species, j))   
+                    k += 1                     
+                    # third coordinate         
+                    f2.write('{:5} {:3} {:5}   0.00 0.00 1.00\n'.format(k, 
+                             at.species, j)) 
+                    k += 1
+                    j += 1
+            f2.write('%endblock IONIC_CONSTRAINTS\n')
+            f2.write('\nfix_all_cell = true\n\n')
+            f2.write('kpoints_mp_grid 4 4 2\n\n')
+            f2.write('SYMMETRY_GENERATE\n\n')
+            f2.write('%block species_pot\n')
+            for s in types:
+                f2.write('{}   {}_00PBE_OP.recpot\n'.format(s, s))
+            f2.write('%endblock species_pot\n')
+            f2.close()
+
+    else :
+        print '!!! ERROR PrintStruct: Unrecognised filetype !!!'
 
 def main():
     str1 = ReadStruct('dump.SiO2tomelt', style='lmp_dump')
