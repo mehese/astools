@@ -1,11 +1,10 @@
-#! /usr/bin/env python
 # -*- coding: utf-8 -*-p
 
 import numpy as np
-from operations import *
+from astools.operations import *
+from astools.ReadWrite import PrintStruct, ReadStruct
 from operator import itemgetter, attrgetter
 from itertools import product
-from ReadWrite import PrintStruct, ReadStruct
 
 
 global coordination_dict 
