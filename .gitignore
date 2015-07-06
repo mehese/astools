@@ -5,6 +5,7 @@
 data.*
 dump.*
 fort*
+PrintStruct.out
 INPUT*
 *.cell
 *.pdf
@@ -12,4 +13,5 @@ INPUT*
 *.castep
 *.LOG
 ERROR
+build/*
 

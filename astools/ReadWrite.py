@@ -1,3 +1,5 @@
+#! /usr/bin/python2.7
+
 from astools.structures import *
 
 # Dictionary that changes the Z to a string defining the atom species
@@ -223,6 +225,32 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False,
                          species2Z[atom.species], x_, y_, z_))
             f2.write('ENDGEOM\nSTOP\n')
             f2.close()
+    elif filetype == 'xsf':
+        if structure.periodicity == 'bulk':
+            f2 = open(name, 'w')
+
+            f2.write('CRYSTAL\n')
+            f2.write('PRIMVEC\n')
+            f2.write('  {:10.5f}  {:10.5f}  {:10.5f}\n'.format(structure.coordx,
+                                                             0., 0.))
+            f2.write('  {:10.5f}  {:10.5f}  {:10.5f}\n'.format(0.,
+                                                             structure.coordy, 0.))
+            f2.write('  {:10.5f}  {:10.5f}  {:10.5f}\n'.format(0.,
+                                                             0.,structure.coordz))
+            f2.write('CONVVEC\n')
+            f2.write('  {:10.5f}  {:10.5f}  {:10.5f}\n'.format(structure.coordx,
+                                                               0., 0.))
+            f2.write('  {:10.5f}  {:10.5f}  {:10.5f}\n'.format(0.,
+                                                               structure.coordy, 0.))
+            f2.write('  {:10.5f}  {:10.5f}  {:10.5f}\n'.format(0.,
+                                                             0.,structure.coordz))
+            f2.write('PRIMCOORD\n')
+            f2.write(str(len(structure))+' 1'+'\n')
+            for atom in structure.atoms:
+                f2.write('{:3d} {:15.9f} {:15.9f} {:15.9f}\n'.format(
+                species2Z[atom.species], atom.x, atom.y, atom.z))
+
+            f2.close()
     elif filetype == 'castep_inp' and freeze_tagged == False:
         if structure.periodicity == 'bulk':
             f2 = open(name, 'w')
@@ -314,17 +342,10 @@ def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False,
         print '!!! ERROR PrintStruct: Unrecognised filetype !!!'
 
 def main():
-    str1 = ReadStruct('dump.SiO2tomelt', style='lmp_dump')
-    str2 = ReadStruct('dump.SiO2tomelt', style='lmp_dump', pos=-2)
-    str3 = ReadStruct('dump.SiO2tomelt', style='lmp_dump', pos=-3)
-    str4 = ReadStruct('dump.SiO2tomelt', style='lmp_dump', pos=-4)
-    
+    s = ReadStruct('../various_inputs/INPUT_SiO2Si')
+    print len(s)
+    PrintStruct(s, 'xsf')
 
-    #sio2 = ReadStruct('SiO2Si.cell', style='castep_inp')
-    PrintStruct(str1, 'crystal_inp', name='INPUT_1')
-    PrintStruct(str2, 'crystal_inp', name='INPUT_2')
-    PrintStruct(str3, 'crystal_inp', name='INPUT_3')
-    PrintStruct(str4, 'crystal_inp', name='INPUT_4')
     print 'All done!'
 
 if __name__ == "__main__" :
