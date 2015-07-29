@@ -271,7 +271,8 @@ def pairof4(structure, dmax = 10.):
 
     return dlist, d2list 
 
-def get_neighbours(at_main, structure, dmax=10., verbose=False):
+def get_neighbours(at_main, structure, dmax=10., verbose=False,
+                   no_neighbours=None):
     """Returns a list of neighbours for the atom in the structure
 
     (Atom, AtomStruct, float) -> at_neighbours
@@ -323,7 +324,9 @@ def get_neighbours(at_main, structure, dmax=10., verbose=False):
     # i will iterate through the coordination number as to create an initial
     # list that has an appropriate length (i.e 2 for oxygen, 4 for Si and Hf)
     i, voisins = 0, []
-    while len(voisins) < coordination_dict[atx.species]:
+    if not no_neighbours:
+        no_neighbours = coordination_dict[atx.species]
+    while len(voisins) < no_neighbours:
         if newstr[i] != atx:
             d = distance(atx, newstr[i])
             voisins.append(neighbour(newstr[i], d))
