@@ -7,6 +7,12 @@ from astools.structures import *
 Z2species = {0: 'X', 1:'H', 2:'He', 8:'O', 13: 'Al', 14:'Si', 15:'P', 72:'Hf', 89: 'Hf'}
 species2Z = {v:k for k, v in Z2species.items()}
 
+class UnrecognisedFiletype(Exception):
+    pass
+
+class BadFile(Exception):
+    pass
+
 def ReadStruct(filename, style='crystal', pos=-1):
     """ Reads and input file and returns an AtomStruct
     (str, str) -> AtomStruct
@@ -42,8 +48,8 @@ def ReadStruct(filename, style='crystal', pos=-1):
                                  frac=True)
             return crystal
         else:
-            print 'Bad File !!!'
-            exit()
+            raise BadFile 
+
     if style == 'crystal_out':
         f = open(filename, 'r').read()
         #print 'opened', filename
@@ -138,8 +144,7 @@ def ReadStruct(filename, style='crystal', pos=-1):
         return crystal
 
     else:
-        print 'Filetype not recognized !!!'
-        exit()
+        raise UnrecognisedFiletype
 
 def PrintStruct(structure, filetype, name='PrintStruct.out', nocharge=False,
                 freeze_tagged = False, mark_frozen = False):
