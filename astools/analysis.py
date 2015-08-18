@@ -324,6 +324,7 @@ def get_neighbours(at_main, structure, dmax=10., verbose=False,
     # i will iterate through the coordination number as to create an initial
     # list that has an appropriate length (i.e 2 for oxygen, 4 for Si and Hf)
     i, voisins = 0, []
+    i_list = (p for p in range(len(newstr)))
     if not no_neighbours:
         no_neighbours = coordination_dict[atx.species]
     while len(voisins) < no_neighbours:
@@ -331,7 +332,8 @@ def get_neighbours(at_main, structure, dmax=10., verbose=False,
             d = distance(atx, newstr[i])
             voisins.append(neighbour(newstr[i], d))
             # One less neighbour to worry about
-        i = np.random.randint(len(newstr)) 
+        #i = np.random.randint(len(newstr)) 
+        i = i_list.next()
 
     if verbose:
         print 'Initial list:', [str(l) for l in voisins]
